@@ -49,15 +49,15 @@ window.restaurantLocation = (() => {
 
   async function findAddress() {
     const address = addressInput.value.trim();
-    if (address.length < 6 || address.length > 100) {
-      status.textContent = 'Enter a US street address with city/state or ZIP (6–100 characters).'; return;
+    if (address.length < 2 || address.length > 100) {
+      status.textContent = 'Enter a US city, ZIP code, street, or combination.'; return;
     }
     cancelLookup();
     const id = lookupId;
     addressRequest = new AbortController();
     document.querySelector('#apply-address').disabled = true;
     status.textContent = 'Looking up your address…';
-    const log = apiDebug.start({group: `address-${id}`, trigger: 'Find address', purpose: 'US Census address lookup through local server', method: 'POST', endpoint: '/api/geocode', parameters: {address: '[address hidden]'}});
+    const log = apiDebug.start({group: `address-${id}`, trigger: 'Find address', purpose: 'Address or ZIP lookup through local server', method: 'POST', endpoint: '/api/geocode', parameters: {address: '[address hidden]'}});
     let httpStatus;
     try {
       const response = await fetch('/api/geocode', {method:'POST', signal:addressRequest.signal,
@@ -69,18 +69,18 @@ window.restaurantLocation = (() => {
       if (id !== lookupId) { apiDebug.markGroup(`address-${id}`, 'Superseded'); return; }
       const matches = data.matches || [];
       if (!matches.length) {
-        status.textContent = 'No address match. Include the street number, street, city/state or ZIP, or use your location. Your current search area is unchanged.';
+        status.textContent = 'No location match. Add a city, state, or ZIP to narrow the search, or use your location. Your current search area is unchanged.';
         apiDebug.markGroup(`address-${id}`, 'No matching address');
       } else {
         // Let the visitor confirm even a single matched address; geocoders can return an unexpected match.
         const choices = document.querySelector('#address-matches'); choices.replaceChildren();
         matches.forEach(match => {
           const button = document.createElement('button'); button.type = 'button';
-          button.textContent = `Use this address: ${match.label}`;
+          button.textContent = `Use this location: ${match.label}`;
           button.addEventListener('click', () => applyAddress(match, id)); choices.append(button);
         });
         choices.hidden = false;
-        status.textContent = 'Confirm the matched address below to search nearby.';
+        status.textContent = 'Select the address match in the popup to search nearby.';
         apiDebug.markGroup(`address-${id}`, 'Address matches returned; waiting for selection');
       }
     } catch (error) {
@@ -118,10 +118,10 @@ window.restaurantLocation = (() => {
     }, error => {
       if (id !== lookupId) return;
       deviceButton.disabled = false;
-      const reason = error.code === 1 ? 'Location permission was declined.' : error.code === 3 ? 'Location lookup timed out.' : 'Your device could not determine a location.';
+      const reason = error.code === 1 ? 'Location permission was declined.' : error.code === 3 ? 'Location lookup timed out after 20 seconds. Try allowing location in your browser and system settings, or use a full US street address.' : 'Your device could not determine a location.';
       status.textContent = `${reason} Enter an address instead. The current search location has not changed.`;
-      addressToggle.focus();
-    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+      showAddress(true);
+    }, { enableHighAccuracy: false, timeout: 20000, maximumAge: 300000 });
   }
 
   function parameters() {

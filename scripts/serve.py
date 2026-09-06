@@ -60,7 +60,7 @@ class PublicFiles(SimpleHTTPRequestHandler):
             result = lookup_address(body.get('address'))
             code = 200
         except (ValueError, UnicodeError):
-            result, code = {'error':'Enter a complete US street address (6–100 characters).'}, 400
+            result, code = {'error':'Enter a US city, ZIP, or street (2–100 characters).'}, 400
         except (URLError, TimeoutError, OSError):
             result, code = {'error':'Address lookup is unavailable. Try again or use device location.'}, 502
         payload = json.dumps(result).encode()

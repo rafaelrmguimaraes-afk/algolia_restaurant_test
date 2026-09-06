@@ -62,6 +62,6 @@ const location=context.restaurantLocation;
  node('#address-form').listeners.submit({preventDefault(){}});
  pending.shift().resolve({ok:true,status:200,json:async()=>({matches:[]})});
  await new Promise(resolve=>setImmediate(resolve));
- assert.match(node('#location-status').textContent,/No address match/);
+ assert.match(node('#location-status').textContent,/No location match/);
  console.log('PASS: no automatic location prompt, address confirmation/fallback, radius, denial/timeout, device rounding/redaction, distances, stale callback and reset.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

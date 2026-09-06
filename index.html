@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="index.css?v=price-band1">
   <!-- defer preserves script order and waits for HTML parsing: logger first, then app. -->
   <script src="debug.js" defer></script>
-  <script src="location.js?v=20260906-2" defer></script>
+  <script src="location.js?v=osm1" defer></script>
 
   <script src="sentence-search.js?v=pizza1" defer></script>
   <script src="index.js?v=price-priority4" defer></script>
@@ -35,11 +35,12 @@
             <div id="address-panel" class="address-panel" hidden>
               <div class="address-panel-heading"><span>Search near an address</span><button id="close-address" type="button" aria-label="Close address lookup">×</button></div>
             <form id="address-form" class="address-form">
-              <label class="sr-only" for="location-address">US street address, city, state or ZIP</label>
-              <input id="location-address" type="text" placeholder="Street address, city, state or ZIP" maxlength="100" autocomplete="off" aria-describedby="location-privacy">
+              <label class="sr-only" for="location-address">Complete US street address</label>
+              <input id="location-address" type="text" placeholder="City, ZIP, or street" maxlength="100" autocomplete="off" aria-describedby="location-privacy">
               <button id="apply-address" type="submit">Find</button>
             </form>
-              <p class="address-panel-note">Enter a US street address with city/state or ZIP, then confirm the match.</p>
+              <p class="address-panel-note">Enter a US city, ZIP, street, or combination, then select a match. Add a state to narrow ambiguous places.</p>
+              <p class="address-panel-note">Search public locations only; do not enter personal or confidential information. Location data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p>
               <div id="address-matches" aria-label="Matching addresses" hidden></div>
             </div>
           </section>
@@ -55,7 +56,7 @@
           <button id="clear-location" type="button" hidden>Clear location</button>
           <p id="location-status" role="status" aria-live="polite"></p>
         </div>
-        <details class="location-help"><summary>About location search</summary><p id="location-privacy">Find sends your US address to the Census Geocoder; nearby search shares coordinates with Algolia. This demo does not save your location. Distances are approximate and measured in a straight line.</p></details>
+        <details class="location-help"><summary>About location search</summary><p id="location-privacy">Find sends your search to OpenStreetMap Nominatim; nearby search shares coordinates with Algolia. Location lookups are cached in server memory for up to one hour; they are not saved to disk. Distances are approximate and measured in a straight line.</p></details>
       </header>
       <div class="page__content">
         <!-- Fieldsets/legends group related controls accessibly. Cuisine checkboxes come from Algolia facets. -->
