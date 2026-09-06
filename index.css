@@ -1,5 +1,9 @@
+/* FILE MAP: supplied starter styles first; active responsive overrides start at
+   "First-pass UI" below. Later rules win when specificity is equal. Some starter
+   selectors are unused, retained to preserve the assignment scaffold. */
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600");
 
+/* Reset browser defaults so spacing and typography start from a consistent baseline. */
 html,
 body,
 div,
@@ -134,6 +138,7 @@ table {
   box-sizing: border-box;
 }
 
+/* STARTER COMPONENTS: original button/filter layout, including floats and desktop rules. */
 .button {
   float: left;
   width: 100%;
@@ -323,6 +328,7 @@ table {
   color: #ffffff;
 }
 
+/* Original animated loader. The current HTML uses loading text rather than this component. */
 .loader {
   width: 50px;
   height: 50px;
@@ -349,6 +355,7 @@ table {
   }
 }
 
+/* Original page/card/search styles. Later overrides remove fixed-height desktop constraints. */
 .page {
   width: 100%;
   height: 100vh;
@@ -551,17 +558,21 @@ table {
 }
 
 /* First-pass UI: keep the supplied class names; modernize layout below. */
+/* Theme variables: edit these shared colors to adjust the current interface consistently. */
 :root { --ink:#223740; --muted:#62757d; --blue:#1c688e; --line:#e2e9ec; }
 body { font-family: 'Open Sans', Arial, sans-serif; color:var(--ink); line-height:1.5; font-size:16px; }
 button,input,select { font:inherit; }
 button { cursor:pointer; }
 button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible { outline:3px solid #e69b45; outline-offset:3px; }
 [hidden] { display:none !important; }
+/* Accessibility helpers: labels stay available to screen readers; keyboard focus stays visible. */
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
 .skip-link { position:absolute; top:-60px; background:white; padding:12px; z-index:2; }
 .skip-link:focus { top:0; }
+/* CURRENT PAGE SHELL: centered maximum width, normal scrolling, no clipped results. */
 .page { height:auto; min-height:100vh; padding:48px 24px; background-color:#f0f3f3; }
 .page__container { position:static; width:100%; height:auto; max-height:none; max-width:1100px; margin:auto; display:block; border:1px solid #d5dfe3; border-radius:12px; overflow:hidden; box-shadow:0 12px 40px #22374012; }
+/* Search header: flexible input/button row; min-width:0 lets the input shrink on small screens. */
 .search-bar { position:static; width:100%; padding:28px 34px 32px; background:#1c688e; color:white; }
 .heading { display:flex; justify-content:space-between; gap:16px; align-items:center; }
 .brand { font-size:13px; letter-spacing:2px; font-weight:600; }
@@ -571,6 +582,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible { 
 .search-bar__input { min-width:0; padding:17px; font-size:16px; border-radius:6px; color:var(--ink); }
 .search-bar__input::placeholder { color:#6c7e86; font-size:15px; }
 .search-button { background:#eff8fc; color:#174f6a; padding:0 26px; border:0; border-radius:6px; font-weight:600; }
+/* Desktop uses a 250px sidebar and a flexible result column. minmax(0,1fr) prevents overflow. */
 .page__content { float:none; padding:0; display:grid; grid-template-columns:250px minmax(0,1fr); }
 .filter { float:none; width:auto; max-height:none; overflow:visible; margin:0; padding:28px 22px; border-right:1px solid var(--line); background:#fbfcfd; }
 .filter-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
@@ -583,12 +595,14 @@ legend { font-weight:600; font-size:14px; margin-bottom:12px; }
 .cuisine-option input { accent-color:var(--blue); width:16px; height:16px; flex-shrink:0; }
 .cuisine-option span:last-child { margin-left:auto; color:var(--muted); font-size:12px; }
 select { width:100%; border:1px solid #cdd9df; border-radius:5px; padding:10px 8px; color:var(--ink); background:white; font-size:14px; }
+/* Result rows use flexbox: fixed thumbnail, flexible text, optional price label. */
 .results { float:none; width:auto; max-height:none; overflow:visible; padding:28px; }
 .results-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; justify-content:space-between; padding-bottom:18px; border-bottom:1px solid var(--line); }
 .results-toolbar h2 { font-weight:600; font-size:16px; }
 #results-note { color:var(--muted); font-size:12px; }
 .result { float:none; display:flex; gap:18px; padding:23px 0; border-bottom:1px solid var(--line); align-items:center; }
 .result__image-container { float:none; position:relative; flex-shrink:0; width:96px; height:96px; margin:0; overflow:hidden; background:#e5eef0; border-radius:8px; }
+/* The image sits over a fallback symbol. If it fails, JavaScript removes only the image. */
 .image-fallback { display:grid; place-items:center; height:100%; color:#527e8c; font-size:36px; }
 .result__image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .result__text-container { min-width:0; flex:1; }
@@ -603,10 +617,27 @@ button:hover { filter:brightness(.95); }
 #empty-state h3 { font-weight:600; font-size:20px; margin-bottom:10px; }
 #empty-state p { color:var(--muted); }
 footer { padding:18px 28px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; }
+/* MOBILE: stack filters above results, shorten thumbnails, and hide redundant price metadata. */
 @media(max-width:700px) { .page { padding:16px 10px; } .search-bar { padding:22px 20px; } .search-bar h1 { font-size:25px; } .page__content { grid-template-columns:1fr; } .filter { border-right:0; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1fr 1fr; gap:18px; padding:20px; } .filter-heading { grid-column:1/-1; } .filter__section { margin:0; } #cuisine-filters { max-height:145px; overflow:auto; } .results { padding:20px; } .demo-label { display:none; } .search-button { padding:0 14px; } .result { gap:12px; } .result__image-container { width:72px; height:84px; } .result__title { font-size:16px; } .result__price { display:none; } footer { flex-direction:column; padding:18px 20px; } }
+/* Scroll only the long cuisine list, while allowing the main document to scroll normally. */
 #cuisine-filters { max-height:260px; overflow-y:auto; padding-right:6px; }
 @media(max-width:700px) { #cuisine-filters { max-height:145px; } }
 
+/* Feedback: a failed request gets a retry panel; disabled buttons prevent duplicate pagination. */
 #search-error { padding:24px; margin-top:20px; background:#fff4e6; border-radius:6px; }
 #retry-search { margin-top:12px; padding:8px 16px; border:1px solid #cdd9df; border-radius:5px; background:white; color:var(--blue); }
 button:disabled { cursor:wait; opacity:.6; }
+
+/* API teaching panel: a bounded, session-only request log. */
+.api-debug { border-top:1px solid var(--line); padding:20px 28px; background:#f5f8fa; }
+.api-debug > summary { cursor:pointer; font-weight:600; }
+.api-debug > summary span { font-weight:400; color:var(--muted); font-size:14px; margin-left:10px; }
+.api-debug > p { font-size:14px; margin-top:12px; line-height:1.6; }
+.api-debug-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:16px 0; font-size:13px; }
+#clear-api-log { background:white; border:1px solid #cdd9df; border-radius:5px; padding:7px 12px; color:var(--blue); }
+#api-log { max-height:380px; overflow:auto; }
+.api-entry { background:white; border:1px solid var(--line); border-radius:6px; padding:12px; margin-bottom:8px; font-size:13px; }
+.api-entry summary { cursor:pointer; overflow-wrap:anywhere; line-height:1.6; }
+.api-entry p { margin-top:8px; overflow-wrap:anywhere; }
+.api-entry pre { margin-top:10px; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 monospace; background:#f5f8fa; padding:12px; }
+@media(max-width:700px) { .api-debug { padding:20px; } .api-debug > summary span { display:block; margin:4px 0 0; } }

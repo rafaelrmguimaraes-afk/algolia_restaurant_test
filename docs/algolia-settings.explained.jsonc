@@ -1,0 +1,25 @@
+// LEARNING COPY ONLY: JSONC accepts comments; Algolia's actual configuration is
+// config/algolia-settings.json (strict JSON). Editing this guide changes nothing live.
+{
+  // Earlier attributes win the attribute-priority step in Algolia's relevance ranking.
+  // Search the restaurant name before its cuisine or location. Other default relevance
+  // criteria, such as typo count, still participate in the ranking order.
+  "searchableAttributes": ["name", "food_type", "city", "neighborhood", "state"],
+
+  // food_type supports both filtering and returned counts for the cuisine sidebar.
+  // filterOnly allows price/payment filtering without returning counts for those fields.
+  "attributesForFaceting": ["food_type", "filterOnly(price_range)", "filterOnly(payment_options)"],
+
+  // Break relevance ties using higher ratings first, then more reviews.
+  // desc means descending. These do not replace the default text relevance rules.
+  "customRanking": ["desc(stars_count)", "desc(reviews_count)"],
+
+  // No highlighted HTML is needed: our cards render plain text with textContent.
+  "attributesToHighlight": [],
+
+  // Default number of restaurant cards per page; JS also explicitly requests six.
+  "hitsPerPage": 6,
+
+  // Maximum distinct cuisine values in the facet response, not a restaurant limit.
+  "maxValuesPerFacet": 200
+}

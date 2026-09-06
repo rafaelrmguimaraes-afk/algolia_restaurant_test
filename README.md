@@ -61,3 +61,33 @@ The existing package.json is retained. The first-pass app uses plain browser Jav
 Syntax checks and live API checks cover counts, cuisine/rating/price/payment filters, combined OR/AND filtering, typo tolerance, and pagination. Local server checks confirm that only public search configuration is exposed and private paths return 404. Automated browser visual testing has not been performed. Historical restaurant photo URLs may no longer work; the cards retain a fallback.
 
 References: [Search an index](https://www.algolia.com/doc/rest-api/search/search-single-index), [Batch indexing](https://www.algolia.com/doc/rest-api/search/batch), [Index settings](https://www.algolia.com/doc/rest-api/search/set-settings).
+
+## Explain each API call with the debugger
+
+Expand **API debugger** below the results. The newest 30 application requests stay in memory until you clear the log or reload. Expand a row to see the request JSON, trigger, HTTP status, timing, and whether the result was applied or superseded. The log intentionally omits credentials, request headers, and configuration values. It does not capture image requests, CSS/fonts, or browser CORS preflight requests; use the browser Network tab for those.
+
+| Action | API calls | Why |
+| --- | --- | --- |
+| Page load | `GET /config.json`, then `POST /1/indexes/restaurants/query` | The local Python server supplies public search configuration; Algolia returns the first six restaurants and cuisine counts. |
+| Typing | One search after a 200 ms pause; two if cuisines are selected | Avoid a request for every keystroke. A query interrupted before the delay expires never reaches the API. |
+| Select cuisine(s) | Two POST requests to the same `/query` endpoint | One returns matching restaurants. The other uses `hitsPerPage: 0` and omits the cuisine restriction, so counts for other cuisines remain available. |
+| Change rating, price, or payment | One POST, or two with selected cuisines | Apply all current filters; reset pagination to page 0. |
+| Show more | One POST with the next `page` | Get six more hits without recomputing alternative cuisine counts. Algolia pages are zero-based. |
+| Reset | One POST with empty query and no filters | Return to the first page of all restaurants. |
+| Retry | Repeat search; fetch configuration first if it failed | Recover from a network or API error. |
+
+**How to read the JSON:** `query` is the entered text; `facetFilters` contains categorical filters; nested cuisine arrays mean OR, while separate entries mean AND. `numericFilters` contains the minimum rating. `facets: ["food_type"]` asks Algolia for cuisine counts. `hitsPerPage` and `page` control pagination.
+
+**How to read timing:** browser round trip is measured from fetch start until the JSON body is read, including network overhead. `processingTimeMS` is Algolia's reported server processing time. They measure different things.
+
+**How to read cancellation:** “Cancelled in browser” means the frontend stopped waiting; it does not prove the server never processed the request. “Superseded” means a newer action replaced this search; its results are not applied. A successful earlier search keeps its historical “Applied to page” label.
+
+**Indexing is a separate Python flow.** Running `scripts/index_data.py` sends ten `POST /1/indexes/restaurants/batch` calls (500 records each), checks `GET /1/indexes/restaurants/task/{taskID}` until each batch is published, then sends `PUT /1/indexes/restaurants/settings` and waits for that task. Those calls use the private write key and do not occur when a visitor searches. They are printed as progress by Python rather than logged in the browser.
+
+Interview wording: “The browser gets search configuration from my local server, then queries Algolia directly. Each response includes restaurant hits and facet counts. When a cuisine is selected, a second query calculates counts without that cuisine constraint so users can add other cuisines. I debounce typing, request the next page for Show more, and ignore responses superseded by newer input.”
+
+The debugger is isolated in `debug.js`. It only receives explicitly selected metadata and search parameters; it never receives API headers or raw response bodies. Run its behavior checks with `node tests/debug.test.cjs`.
+
+## Read the commented code
+
+Start with [the file walkthrough](docs/FILE-WALKTHROUGH.md). The HTML, CSS, JavaScript, Python, test, and blank environment template now contain explanatory comments. For strict JSON, use [the annotated settings copy](docs/algolia-settings.explained.jsonc) and the walkthrough's record/configuration tables; working JSON cannot contain comments.

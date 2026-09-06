@@ -7,15 +7,19 @@
   <title>Restaurant Finder</title>
   <link rel="icon" href="assets/favicon.ico">
   <link rel="stylesheet" href="index.css">
+  <!-- defer preserves script order and waits for HTML parsing: logger first, then app. -->
+  <script src="debug.js" defer></script>
   <script src="index.js" defer></script>
 </head>
 <body>
+  <!-- A keyboard shortcut past the page framing; visible when focused. -->
   <a class="skip-link" href="#search-input">Skip to search</a>
   <main class="page">
     <div class="page__container">
       <header class="search-bar">
         <div class="heading"><span class="brand">◉ &nbsp; RESTAURANT FINDER</span><span class="demo-label">Search by Algolia</span></div>
         <h1>Good food. Your kind of place.</h1>
+        <!-- JS reads these IDs. Submit is handled in-place instead of navigating/reloading. -->
         <form id="search-form" role="search" class="search-bar__container">
           <label class="sr-only" for="search-input">Search by restaurant, cuisine, or location</label>
           <input id="search-input" class="search-bar__input" type="search" placeholder="Search by restaurant, cuisine, or location…" autocomplete="off">
@@ -23,6 +27,7 @@
         </form>
       </header>
       <div class="page__content">
+        <!-- Fieldsets/legends group related controls accessibly. Cuisine checkboxes come from Algolia facets. -->
         <aside class="filter" aria-label="Refine restaurants">
           <div class="filter-heading"><h2>Refine your search</h2><button id="clear-all" type="button">Reset</button></div>
           <fieldset class="filter__section"><legend>Cuisine / Food type</legend><div id="cuisine-filters"></div></fieldset>
@@ -30,17 +35,29 @@
           <fieldset class="filter__section"><legend>Price per person</legend><label for="price" class="sr-only">Price per person</label><select id="price"><option value="">All prices</option><option>$30 and under</option><option>$31 to $50</option><option>$50 and over</option></select></fieldset>
           <fieldset class="filter__section"><legend>Payment options</legend><label for="payment" class="sr-only">Payment options</label><select id="payment"><option value="">All payment options</option><option>AMEX</option><option>Discover</option><option>MasterCard</option><option>Visa</option></select></fieldset>
         </aside>
+        <!-- aria-busy signals loading; the live result count announces updates to assistive technology. -->
         <section class="results" aria-label="Restaurant results" aria-busy="true">
           <div class="results-toolbar"><h2 id="results-count" role="status" aria-live="polite">Loading restaurants…</h2><span id="results-note">Explore something delicious</span></div>
+          <!-- JavaScript inserts cloned restaurant cards here after each successful response. -->
           <div id="results-list"></div>
+          <!-- Error and zero-match states are separate: a failed request is not an empty search. -->
           <div id="search-error" role="alert" hidden><p>We couldn’t complete your search. Check your connection and try again.</p><button id="retry-search" type="button">Try again</button></div>
           <div id="empty-state" hidden><h3>No restaurants found</h3><p>Try another name or location, or reset your filters.</p><button id="empty-reset" type="button">Clear search and filters</button></div>
           <button id="show-more" class="show-more" type="button" hidden>Show more restaurants</button>
         </section>
       </div>
+      <!-- Built-in details/summary provides an expandable teaching panel without another UI library. -->
+      <details class="api-debug" open>
+        <summary>API debugger <span>See what each action sends</span></summary>
+        <p>Typing waits 200 ms before searching. Selecting a cuisine sends two requests: one for restaurants and one for cuisine counts without the cuisine restriction. Show more sends one request for the next page.</p>
+        <p>Expand a request to inspect its JSON. Browser round trip includes network and response reading; Algolia processing is server time. Keys and headers are omitted. This log covers application API calls, not photos, styles, or browser preflight requests.</p>
+        <div class="api-debug-toolbar"><span id="api-log-status" role="status" aria-live="polite">No requests recorded</span><button id="clear-api-log" type="button">Clear log</button></div>
+        <div id="api-log" aria-label="Recent API requests"></div>
+      </details>
       <footer>Find a new favorite <span>Restaurant search demo · Assignment dataset</span></footer>
     </div>
   </main>
+  <!-- Inert markup: invisible until renderCards() clones it and fills fields with textContent. -->
   <template id="result-template">
     <article class="result">
       <div class="result__image-container"><span class="image-fallback" aria-hidden="true">♨</span><img class="result__image" alt="" loading="lazy"></div>
@@ -48,6 +65,7 @@
       <span class="result__price"></span>
     </article>
   </template>
+  <!-- The live search needs JavaScript; explain that when scripting is disabled. -->
   <noscript>Please enable JavaScript to search restaurants.</noscript>
 </body>
 </html>

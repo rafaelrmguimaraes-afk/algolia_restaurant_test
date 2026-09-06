@@ -1,10 +1,13 @@
+# Ignore actual credentials; the ! exception below keeps the blank template shareable.
 .env
 .env.*
 !.env.example
+# Generated dependencies, caches, and build output can be recreated on another computer.
 node_modules/
 .cache/
 dist/
 __pycache__/
+# macOS Finder metadata is unrelated to the application.
 .DS_Store
 
 # Original duplicate starter bundles stay local.
