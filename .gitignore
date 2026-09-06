@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.cache/
+dist/
+__pycache__/
+.DS_Store
+
+# Original duplicate starter bundles stay local.
+project-files/
+project-files.zip

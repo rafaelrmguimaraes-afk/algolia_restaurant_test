@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Find your next restaurant by name, cuisine, and location.">
+  <title>Restaurant Finder</title>
+  <link rel="icon" href="assets/favicon.ico">
+  <link rel="stylesheet" href="index.css">
+  <script src="index.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#search-input">Skip to search</a>
+  <main class="page">
+    <div class="page__container">
+      <header class="search-bar">
+        <div class="heading"><span class="brand">◉ &nbsp; RESTAURANT FINDER</span><span class="demo-label">Search by Algolia</span></div>
+        <h1>Good food. Your kind of place.</h1>
+        <form id="search-form" role="search" class="search-bar__container">
+          <label class="sr-only" for="search-input">Search by restaurant, cuisine, or location</label>
+          <input id="search-input" class="search-bar__input" type="search" placeholder="Search by restaurant, cuisine, or location…" autocomplete="off">
+          <button type="submit" class="search-button">Search</button>
+        </form>
+      </header>
+      <div class="page__content">
+        <aside class="filter" aria-label="Refine restaurants">
+          <div class="filter-heading"><h2>Refine your search</h2><button id="clear-all" type="button">Reset</button></div>
+          <fieldset class="filter__section"><legend>Cuisine / Food type</legend><div id="cuisine-filters"></div></fieldset>
+          <fieldset class="filter__section"><legend>Minimum rating</legend><label for="rating" class="sr-only">Minimum rating</label><select id="rating"><option value="0">All ratings</option><option value="3">★ 3.0 and up</option><option value="4">★ 4.0 and up</option><option value="4.5">★ 4.5 and up</option></select></fieldset>
+          <fieldset class="filter__section"><legend>Price per person</legend><label for="price" class="sr-only">Price per person</label><select id="price"><option value="">All prices</option><option>$30 and under</option><option>$31 to $50</option><option>$50 and over</option></select></fieldset>
+          <fieldset class="filter__section"><legend>Payment options</legend><label for="payment" class="sr-only">Payment options</label><select id="payment"><option value="">All payment options</option><option>AMEX</option><option>Discover</option><option>MasterCard</option><option>Visa</option></select></fieldset>
+        </aside>
+        <section class="results" aria-label="Restaurant results" aria-busy="true">
+          <div class="results-toolbar"><h2 id="results-count" role="status" aria-live="polite">Loading restaurants…</h2><span id="results-note">Explore something delicious</span></div>
+          <div id="results-list"></div>
+          <div id="search-error" role="alert" hidden><p>We couldn’t complete your search. Check your connection and try again.</p><button id="retry-search" type="button">Try again</button></div>
+          <div id="empty-state" hidden><h3>No restaurants found</h3><p>Try another name or location, or reset your filters.</p><button id="empty-reset" type="button">Clear search and filters</button></div>
+          <button id="show-more" class="show-more" type="button" hidden>Show more restaurants</button>
+        </section>
+      </div>
+      <footer>Find a new favorite <span>Restaurant search demo · Assignment dataset</span></footer>
+    </div>
+  </main>
+  <template id="result-template">
+    <article class="result">
+      <div class="result__image-container"><span class="image-fallback" aria-hidden="true">♨</span><img class="result__image" alt="" loading="lazy"></div>
+      <div class="result__text-container"><p class="result__location"></p><h3 class="result__title"></h3><p class="result__rating"></p><p class="result__summary"></p></div>
+      <span class="result__price"></span>
+    </article>
+  </template>
+  <noscript>Please enable JavaScript to search restaurants.</noscript>
+</body>
+</html>
