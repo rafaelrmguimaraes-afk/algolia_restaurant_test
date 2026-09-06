@@ -4,6 +4,8 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 from config import ROOT, load_env
+from geocode import lookup_address
+from urllib.error import URLError
 
 # Extend the standard-library file server with one dynamic configuration endpoint.
 class PublicFiles(SimpleHTTPRequestHandler):
@@ -33,7 +35,7 @@ class PublicFiles(SimpleHTTPRequestHandler):
             self.wfile.write(body)
             return
         # Serve only these exact files. A generic folder server would also expose .env and source data.
-        allowed = {'/', '/index.html', '/index.css', '/index.js', '/debug.js', '/assets/favicon.ico',
+        allowed = {'/', '/index.html', '/index.css', '/index.js', '/debug.js', '/location.js', '/sentence-search.js', '/assets/favicon.ico',
                    '/assets/images/background.png', '/assets/images/background_@2X.png'}
         if path not in allowed:
             self.send_error(404)
@@ -41,7 +43,34 @@ class PublicFiles(SimpleHTTPRequestHandler):
         # Delegate actual public-file reading and MIME types to the standard-library server.
         super().do_GET()
 
-    # This minimal preview implements GET only; HEAD is intentionally rejected.
+    # The preview serves GET assets and one POST address lookup; HEAD is intentionally rejected.
+    # POST keeps the submitted address out of URLs and normal access logs.
+    # It is forwarded only to the fixed Census endpoint, after an explicit user action.
+    def do_POST(self):
+        if self.path != '/api/geocode':
+            self.send_error(404)
+            return
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+            if not 0 < length <= 2048:
+                raise ValueError('Invalid address request size')
+            body = json.loads(self.rfile.read(length))
+            if not isinstance(body, dict):
+                raise ValueError('Expected an address object')
+            result = lookup_address(body.get('address'))
+            code = 200
+        except (ValueError, UnicodeError):
+            result, code = {'error':'Enter a complete US street address (6–100 characters).'}, 400
+        except (URLError, TimeoutError, OSError):
+            result, code = {'error':'Address lookup is unavailable. Try again or use device location.'}, 502
+        payload = json.dumps(result).encode()
+        self.send_response(code)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Content-Length', str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
     def do_HEAD(self):
         self.send_error(405)
 

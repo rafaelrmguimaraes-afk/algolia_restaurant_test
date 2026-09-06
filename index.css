@@ -641,3 +641,168 @@ button:disabled { cursor:wait; opacity:.6; }
 .api-entry p { margin-top:8px; overflow-wrap:anywhere; }
 .api-entry pre { margin-top:10px; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.5 monospace; background:#f5f8fa; padding:12px; }
 @media(max-width:700px) { .api-debug { padding:20px; } .api-debug > summary span { display:block; margin:4px 0 0; } }
+
+/* Optional location controls: a full-width row above filters, stacked on mobile. */
+.location-controls { padding:22px 28px; border-bottom:1px solid var(--line); background:#f8fbfc; }
+.location-controls h2 { font-size:17px; font-weight:600; margin-bottom:12px; }
+.location-row { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; }
+.location-row label { display:block; font-size:13px; margin-bottom:5px; }
+.location-city-field { flex:1 1 220px; }
+#location-city { width:100%; padding:10px; border:1px solid #cdd9df; border-radius:5px; color:var(--ink); }
+.location-row button { padding:10px 14px; border:1px solid #cdd9df; border-radius:5px; background:white; color:var(--blue); font-size:14px; }
+#apply-city { background:var(--blue); color:white; }
+#location-status { margin-top:12px; font-size:14px; }
+#location-privacy { margin-top:6px; font-size:12px; color:var(--muted); line-height:1.6; }
+.result__distance { margin-top:6px; color:var(--blue); font-size:13px; }
+@media(max-width:700px) { .location-controls { padding:20px; } .location-city-field { flex-basis:100%; } .location-row { align-items:flex-end; } }
+
+/* Compact brand badges and an external reservation action on each restaurant card. */
+.result__payments { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; list-style:none; }
+.payment-badge { padding:3px 7px; border:1px solid #d7e1e7; border-radius:4px; background:#f6f9fb; color:#425d69; font-size:12px; line-height:1.5; font-weight:600; }
+.result__reserve { display:inline-flex; align-items:center; gap:10px; margin-top:14px; padding:9px 13px; background:var(--blue); color:white; border-radius:5px; text-decoration:none; font-size:14px; font-weight:600; }
+.result__reserve:hover { background:#175572; }
+.result__reserve:focus-visible { outline:3px solid #e69b45; outline-offset:3px; }
+
+/* OpenTable header: compact search beside an independent address/location control. */
+.brand { text-transform:none; font-size:23px; letter-spacing:-.6px; }
+.search-bar { padding:24px 28px; }
+.search-bar h1 { font-size:25px; margin:16px 0 20px; }
+.search-location-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:end; gap:22px; }
+.search-bar__container { gap:8px; }
+.search-bar__input { padding:12px; font-size:15px; }
+.search-bar__input::placeholder { font-size:14px; }
+.search-button { padding:0 18px; font-size:14px; }
+.search-bar .location-controls { padding:0; background:none; border:0; min-width:0; }
+.location-prompt { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px; font-size:14px; }
+#use-location { border:0; padding:0; background:none; color:white; text-decoration:underline; text-underline-offset:3px; font-size:14px; font-weight:600; }
+.address-form { display:flex; gap:8px; }
+#location-address { min-width:0; flex:1; border:1px solid #cdd9df; padding:12px; border-radius:6px; font-size:14px; color:var(--ink); }
+#apply-address { padding:0 15px; background:#eff8fc; color:#174f6a; border:0; border-radius:6px; font-size:14px; font-weight:600; }
+.location-meta { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:14px; font-size:13px; }
+#location-radius { width:auto; font-size:13px; padding:6px; }
+#clear-location { background:transparent; color:white; border:1px solid #ffffff66; border-radius:4px; padding:6px 8px; font-size:13px; }
+#location-status { margin:0; flex:1 1 260px; font-size:13px; }
+#location-privacy { color:#e0edf3; font-size:12px; margin-top:10px; }
+#address-matches { padding-top:10px; display:grid; gap:6px; }
+#address-matches button { text-align:left; padding:10px; border:1px solid #cdd9df; border-radius:5px; color:var(--ink); background:white; font-size:14px; }
+@media(max-width:700px) { .search-location-row { grid-template-columns:1fr; gap:14px; } .search-bar { padding:20px; } .search-bar h1 { font-size:23px; } }
+
+/* Address entry is an explicitly opened popover beside the compact restaurant search. */
+.search-bar .location-controls { position:relative; align-self:center; }
+.location-prompt { margin:0; }
+#toggle-address { border:0; padding:0; background:none; color:white; text-decoration:underline; text-underline-offset:3px; font:inherit; cursor:pointer; }
+.address-panel { position:absolute; z-index:5; top:calc(100% + 12px); right:0; width:100%; min-width:290px; padding:16px; border:1px solid #d7e1e7; border-radius:8px; background:white; color:var(--ink); box-shadow:0 12px 32px #173a4933; }
+.address-panel-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; font-size:15px; font-weight:600; }
+#close-address { border:0; background:none; color:var(--muted); padding:2px 7px; font-size:24px; cursor:pointer; }
+.address-panel-note { margin-top:10px; color:var(--muted); font-size:12px; line-height:1.5; }
+.address-panel #apply-address { background:var(--blue); color:white; }
+@media(max-width:700px) { .address-panel { left:0; right:auto; min-width:0; } }
+
+/* Clear hierarchy: restaurant search is primary; location is an optional action.
+   Keep the address form hidden until clicked and reveal distance after selection. */
+.search-bar { padding:24px 28px 20px; }
+.search-bar h1 { margin:16px 0 18px; font-size:26px; }
+.search-location-row { grid-template-columns:minmax(0,1fr) auto; gap:20px; align-items:center; }
+.search-bar__container { background:white; border-radius:8px; padding:4px; gap:4px; }
+.search-bar__input { border:0; background:white; box-shadow:none; padding:10px 12px; }
+.search-button { background:#164f6a; color:white; border-radius:5px; padding:0 18px; }
+.location-prompt { gap:8px; flex-wrap:nowrap; }
+#use-location, #toggle-address { min-height:44px; padding:10px 12px; border:1px solid #ffffff80; border-radius:6px; color:white; background:#ffffff0d; text-decoration:none; font-size:13px; font-weight:600; white-space:nowrap; }
+#use-location:hover, #toggle-address:hover, #toggle-address[aria-expanded="true"] { background:#ffffff24; }
+.location-meta { margin-top:12px; gap:10px; }
+#location-status { flex:1 1 220px; color:#e0edf3; overflow-wrap:anywhere; }
+#location-distance { display:flex; gap:8px; align-items:center; }
+.location-help { margin-top:8px; font-size:12px; color:#e0edf3; }
+.location-help summary { cursor:pointer; width:fit-content; }
+.location-help summary:focus-visible { outline:3px solid #e69b45; outline-offset:3px; }
+#location-privacy { max-width:680px; margin-top:8px; }
+.address-panel { width:390px; max-width:calc(100vw - 64px); }
+@media(max-width:850px) {
+  .search-location-row { grid-template-columns:1fr; gap:12px; }
+  .search-bar .location-controls { justify-self:start; width:100%; }
+  .address-panel { left:0; right:auto; }
+}
+@media(max-width:420px) {
+  .search-bar { padding:20px 16px; }
+  .search-bar h1 { font-size:22px; }
+  .location-prompt { display:grid; grid-template-columns:1fr 1fr; }
+  #use-location, #toggle-address { padding:10px 7px; font-size:12px; }
+  .address-panel { width:100%; max-width:none; padding:12px; }
+  .address-form { flex-wrap:wrap; }
+  #location-address { flex-basis:100%; }
+  #apply-address { min-height:40px; }
+}
+
+/* Centered discovery header: one primary search, followed by optional location.
+   The address popover remains anchored to the location buttons below the search. */
+.page { background-image:none; background-color:#f7f7f5; }
+.search-bar { padding:30px 24px 24px; text-align:center; }
+.heading { justify-content:center; position:relative; }
+.brand { font-size:24px; }
+.demo-label { position:absolute; right:0; font-size:10px; opacity:.85; }
+.search-bar h1 { font-size:36px; line-height:1.2; letter-spacing:-1px; margin:24px 0; }
+.search-location-row { display:flex; flex-direction:column; align-items:center; gap:14px; max-width:580px; margin:0 auto; }
+.search-bar__container { width:100%; min-height:58px; border-radius:32px; padding:5px; box-shadow:0 4px 14px #123e4e24; }
+.search-bar__input { border-radius:28px; padding:12px 18px; font-size:16px; }
+.search-bar__input::placeholder { font-size:16px; }
+.search-button { border-radius:26px; padding:0 24px; }
+.search-bar .location-controls { width:100%; align-self:center; }
+.location-prompt { display:flex; justify-content:center; gap:10px; }
+#use-location, #toggle-address { min-height:40px; border:0; border-radius:24px; padding:10px 18px; background:white; color:#174f6a; font-size:13px; }
+#use-location:hover, #toggle-address:hover, #toggle-address[aria-expanded="true"] { background:#e0edf3; }
+.location-meta { max-width:580px; margin:14px auto 0; justify-content:center; }
+#location-status { flex-basis:100%; font-size:12px; }
+.location-help { margin:6px auto 0; max-width:580px; font-size:11px; }
+.location-help summary { margin:auto; }
+#location-privacy { text-align:left; }
+.address-panel { left:50%; right:auto; transform:translateX(-50%); width:440px; max-width:100%; text-align:left; }
+@media(max-width:700px) {
+  .search-bar { padding:24px 18px; }
+  .search-bar h1 { font-size:28px; margin:20px 0; }
+  .search-bar__input, .search-bar__input::placeholder { font-size:14px; }
+  .search-bar__input { padding:12px; }
+  .search-button { padding:0 18px; }
+  .location-prompt { display:flex; }
+  #use-location, #toggle-address { font-size:12px; padding:10px 14px; }
+}
+
+/* Desktop starts at the left edge; mobile keeps the centered discovery layout. */
+@media(min-width:701px) {
+  .search-bar { text-align:left; }
+  .heading { justify-content:flex-start; }
+  .search-location-row { margin-left:0; margin-right:auto; }
+  .location-prompt { justify-content:flex-start; }
+  .location-meta { margin-left:0; margin-right:auto; justify-content:flex-start; }
+  .location-help { margin-left:0; margin-right:auto; }
+  .location-help summary { margin-left:0; }
+  .address-panel { left:0; transform:none; }
+}
+
+/* Square corners for the search and location actions. */
+.search-bar__container, .search-bar__input, .search-button, #use-location, #toggle-address, #location-address, #apply-address { border-radius:0; }
+
+/* Let the restaurant search span the header, keeping its existing edge padding. */
+.search-location-row { max-width:none; width:100%; }
+
+/* Removable sentence interpretations, using the same square controls. */
+#sentence-filters { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+#sentence-filters:empty, #sentence-note:empty { display:none; }
+#sentence-filters button { background:white; color:var(--blue); border:0; padding:7px 10px; font-size:13px; }
+#sentence-note { font-size:12px; margin-top:8px; }
+@media(max-width:700px) { #sentence-filters { justify-content:center; } }
+
+
+
+/* Compact numbered pagination, wrapping on small screens. */
+#pagination { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:6px; margin-top:24px; }
+#pagination button { min-width:36px; min-height:40px; padding:6px 10px; background:white; color:var(--blue); border:1px solid var(--line); }
+#pagination button[aria-current="page"] { background:var(--blue); color:white; opacity:1; }
+#pagination button:disabled { cursor:default; }
+
+/* Page size stays beside the result count and wraps on narrow screens. */
+.page-size-control { display:flex; align-items:center; gap:8px; font-size:13px; }
+#page-size { width:auto; padding:6px 10px; }
+
+/* Display the same source price bands used by filtering, including on mobile. */
+.result__price { white-space:nowrap; font-size:13px; }
+@media(max-width:700px) { .result { flex-wrap:wrap; } .result__price { display:block; margin-left:auto; } }

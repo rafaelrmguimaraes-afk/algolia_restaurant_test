@@ -1,6 +1,6 @@
 # Understanding the project
 
-Read in this order: `index.html` → current overrides near the bottom of `index.css` → `index.js` → `debug.js`. Then read `scripts/prepare_data.py`, `config/algolia-settings.json`, and `scripts/index_data.py` to understand where the search data comes from.
+Read in this order: `index.html` → current overrides near the bottom of `index.css` → `index.js` → `debug.js` → `location.js`. Then read `scripts/prepare_data.py`, `config/algolia-settings.json`, and `scripts/index_data.py` to understand where the search data comes from.
 
 ## The two flows
 
@@ -27,12 +27,12 @@ Standard JSON does not accept `//` or `/* ... */` comments. Adding `_comment` pr
 | `neighborhood` | Card summary and searchable attribute. |
 | `price_range` | Text such as `$30 and under`; used by the price dropdown and card summary. |
 | `price` | Original numeric price category used to draw dollar signs. This is not the dropdown filter field. |
-| `payment_options` | Array of payment methods. A Visa filter matches records whose array contains Visa. |
+| `payment_options` | Array of payment methods, displayed as text badges. A Visa filter matches records whose array contains Visa. |
 | `image_url` | Original restaurant photo URL. An unavailable photo falls back to a symbol. |
-| `_geoloc.lat`, `_geoloc.lng` | Coordinates retained for a future geographic-search extension; no distance filter is currently sent. |
+| `_geoloc.lat`, `_geoloc.lng` | Restaurant coordinates used by Algolia for nearby filtering/ranking when the visitor selects a location; see GEO-SEARCH.md. |
 | `address`, `postal_code`, `area`, `country` | Preserved location information; not used by current controls or included in the configured searchable attributes. |
 | `phone`, `phone_number` | Contact fields from the source files; retained, not shown in the current UI. |
-| `reserve_url`, `mobile_reserve_url` | Original booking URLs; retained, but no reservation action is currently implemented. |
+| `reserve_url`, `mobile_reserve_url` | The reserve_url supplies the card’s validated OpenTable booking button; mobile_reserve_url is retained but not used. |
 | `dining_style` | Additional descriptive data, retained for possible later use. |
 
 Generated JSON should normally be recreated with `prepare_data.py`, rather than hand-edited; regeneration overwrites manual changes. Source datasets and duplicate supplied starter files have not been annotated or rewritten.
@@ -78,3 +78,11 @@ The first part of `index.css` is the original assignment stylesheet. Current lay
 ## What to say in the interview
 
 “I separated structure, styling, interaction, and data preparation. Python joins the two datasets and uploads stable IDs to Algolia. The browser builds search parameters from controls and renders Algolia hits. A second query keeps cuisine counts useful when several cuisines can be selected. I handle typing delays, pagination, and stale responses explicitly, and the debugger makes the request flow visible.”
+
+## Location additions
+
+See [GEO-SEARCH.md](GEO-SEARCH.md) for the data audit and nearby-search flow. `data/locations.json` stores labelled approximate centers (`label`, `lat`, `lng`, `restaurantCount`, `source`, `precision`); `data/location-audit.json` stores aggregate checks, review flags, and limitations. Both are strict generated JSON. No device locations are written into either file.
+
+## Address lookup update
+
+The OpenTable UI no longer loads the generated city-center list. `location.js` submits an address only on Find, asks the visitor to choose a matched address, and passes its coordinates to Algolia. `scripts/geocode.py` calls Census through the fixed server endpoint. See [GEO-SEARCH.md](GEO-SEARCH.md) for the current flow and privacy details.

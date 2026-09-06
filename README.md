@@ -1,4 +1,4 @@
-# Restaurant Finder — Algolia demo
+# OpenTable — Algolia restaurant demo
 
 The supplied HTML/CSS starter now searches the live `restaurants` Algolia index. The original four-record `restaurants_test` index is preserved.
 
@@ -18,6 +18,11 @@ Open http://127.0.0.1:8000. Stop with Ctrl+C. Keep the server running while demo
 | --- | --- |
 | `index.html` | Search form, filters, and reusable restaurant card |
 | `index.css` | Supplied styles plus responsive overrides |
+| `location.js` | Optional device/address location, radius, and distance display |
+| `scripts/audit_locations.py` | Validate location data and derive approximate city choices |
+| `data/locations.json` | Retained offline city-center audit output; no longer loaded by the UI |
+| `scripts/geocode.py` | Resolve explicitly submitted US addresses through Census Geocoder |
+| `data/location-audit.json` | Offline audit findings and review flags |
 | `index.js` | Search requests, facet counts, pagination, loading and error states |
 | `dataset/` | Unchanged assignment JSON and CSV |
 | `data/restaurants.json` | 5,000 merged records generated from the original files |
@@ -49,7 +54,7 @@ Set `ALGOLIA_APP_ID`, `ALGOLIA_INDEX_NAME=restaurants`, `ALGOLIA_SEARCH_API_KEY`
 1. Python merges the JSON and CSV by objectID. Algolia receives the combined records in batches.
 2. Searchable attributes are ordered: name, cuisine, city, neighborhood, state. Algolia's default relevance and typo tolerance remain enabled.
 3. Ratings, then review counts, break relevance ties. They do not override a stronger text match. This simple ranking favors high ratings; review-volume weighting is a possible later improvement.
-4. JavaScript waits 200 ms after typing, then searches Algolia directly. No local dataset is downloaded by the page.
+4. JavaScript waits 200 ms after typing, then searches Algolia directly. The full restaurant dataset is not downloaded by the page; submitted addresses are resolved by the local server through the US Census Geocoder.
 5. Cuisines combine with OR; price, payment and minimum rating combine with AND. A second query excluding the cuisine selection supplies counts for alternative cuisines, preserving OR filtering.
 6. Show more requests the next six results. The default Algolia pagination limit means a broad search can display a maximum of 1,000 hits; narrow the query to explore more specific matches.
 7. New input aborts old requests and invalidates stale responses. Loading, empty, retry, and unavailable-photo states are handled explicitly.
@@ -91,3 +96,17 @@ The debugger is isolated in `debug.js`. It only receives explicitly selected met
 ## Read the commented code
 
 Start with [the file walkthrough](docs/FILE-WALKTHROUGH.md). The HTML, CSS, JavaScript, Python, test, and blank environment template now contain explanatory comments. For strict JSON, use [the annotated settings copy](docs/algolia-settings.explained.jsonc) and the walkthrough's record/configuration tables; working JSON cannot contain comments.
+
+## Location-aware search
+
+The demo now includes optional device location, manual address lookup, radius filtering, and approximate distances. Read [the location audit and geo-search guide](docs/GEO-SEARCH.md) for the findings, limitations, privacy choices, API parameters, and repeatable tests. No records needed reindexing because they already contained `_geoloc`.
+
+## Payment and reservation cards
+
+Cards display payment brands from payment_options and a Reserve on OpenTable link from reserve_url. Only http/https URLs on opentable.com or www.opentable.com without embedded credentials/custom ports are accepted; HTTP is upgraded to HTTPS. Missing or invalid links are hidden. Links open in a new tab with noopener/noreferrer. These historical URLs do not guarantee current availability. No booking is submitted by the demo. Test the card behavior with `node tests/cards.test.cjs`.
+
+## Compact OpenTable search header
+
+The restaurant search now sits beside “Use your location or enter your address.” City selection is removed. Submitting Find sends the US street address to `POST /api/geocode`; the Python server calls the fixed Census endpoint and returns matches for the visitor to confirm. Only confirmation starts nearby Algolia search. Addresses and their coordinates are hidden from the debugger; no lookup occurs while typing. The Census lookup requires internet access and may not match every address.
+
+Address entry is hidden by default. Click Enter your address to open its popover; close with ×, Escape, or by confirming a matched address. Device-location errors leave the popover closed until explicitly requested.

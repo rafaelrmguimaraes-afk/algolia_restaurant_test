@@ -4,12 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Find your next restaurant by name, cuisine, and location.">
-  <title>Restaurant Finder</title>
+  <title>OpenTable · Restaurant Search</title>
   <link rel="icon" href="assets/favicon.ico">
-  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="index.css?v=price-band1">
   <!-- defer preserves script order and waits for HTML parsing: logger first, then app. -->
   <script src="debug.js" defer></script>
-  <script src="index.js" defer></script>
+  <script src="location.js?v=20260906-2" defer></script>
+
+  <script src="sentence-search.js?v=pizza1" defer></script>
+  <script src="index.js?v=price-priority4" defer></script>
 </head>
 <body>
   <!-- A keyboard shortcut past the page framing; visible when focused. -->
@@ -17,14 +20,42 @@
   <main class="page">
     <div class="page__container">
       <header class="search-bar">
-        <div class="heading"><span class="brand">◉ &nbsp; RESTAURANT FINDER</span><span class="demo-label">Search by Algolia</span></div>
-        <h1>Good food. Your kind of place.</h1>
-        <!-- JS reads these IDs. Submit is handled in-place instead of navigating/reloading. -->
-        <form id="search-form" role="search" class="search-bar__container">
-          <label class="sr-only" for="search-input">Search by restaurant, cuisine, or location</label>
-          <input id="search-input" class="search-bar__input" type="search" placeholder="Search by restaurant, cuisine, or location…" autocomplete="off">
-          <button type="submit" class="search-button">Search</button>
-        </form>
+        <div class="heading"><span class="brand">◉ &nbsp; OpenTable</span><span class="demo-label">Search by Algolia</span></div>
+        <h1>Find your next favorite table.</h1>
+        <!-- Restaurant search and location are separate forms; each has its own submit action. -->
+        <div class="search-location-row">
+          <form id="search-form" role="search" class="search-bar__container">
+            <label class="sr-only" for="search-input">Search restaurants or cuisines</label>
+            <input id="search-input" class="search-bar__input" type="search" placeholder="Restaurant or cuisine" autocomplete="off">
+            <button type="submit" class="search-button">Search</button>
+          </form>
+          <section class="location-controls" aria-label="Search location">
+            <div class="location-prompt"><button id="use-location" type="button" aria-describedby="location-privacy">Use my location</button><button id="toggle-address" type="button" aria-expanded="false" aria-controls="address-panel">Enter address</button></div>
+            <!-- Address lookup stays hidden until the visitor explicitly opens this panel. -->
+            <div id="address-panel" class="address-panel" hidden>
+              <div class="address-panel-heading"><span>Search near an address</span><button id="close-address" type="button" aria-label="Close address lookup">×</button></div>
+            <form id="address-form" class="address-form">
+              <label class="sr-only" for="location-address">US street address, city, state or ZIP</label>
+              <input id="location-address" type="text" placeholder="Street address, city, state or ZIP" maxlength="100" autocomplete="off" aria-describedby="location-privacy">
+              <button id="apply-address" type="submit">Find</button>
+            </form>
+              <p class="address-panel-note">Enter a US street address with city/state or ZIP, then confirm the match.</p>
+              <div id="address-matches" aria-label="Matching addresses" hidden></div>
+            </div>
+          </section>
+        </div>
+        <div id="sentence-filters" aria-label="Filters from your sentence"></div>
+        <p id="sentence-note" role="status"></p>
+        <div class="location-meta">
+          <!-- Distance becomes relevant only after a location is selected. -->
+          <div id="location-distance" hidden><label for="location-radius">Within</label><select id="location-radius" disabled>
+            <option value="8047">5 miles</option><option value="16093">10 miles</option>
+            <option value="40234" selected>25 miles</option><option value="80467">50 miles</option>
+            <option value="all">Any distance</option></select></div>
+          <button id="clear-location" type="button" hidden>Clear location</button>
+          <p id="location-status" role="status" aria-live="polite"></p>
+        </div>
+        <details class="location-help"><summary>About location search</summary><p id="location-privacy">Find sends your US address to the Census Geocoder; nearby search shares coordinates with Algolia. This demo does not save your location. Distances are approximate and measured in a straight line.</p></details>
       </header>
       <div class="page__content">
         <!-- Fieldsets/legends group related controls accessibly. Cuisine checkboxes come from Algolia facets. -->
@@ -37,31 +68,36 @@
         </aside>
         <!-- aria-busy signals loading; the live result count announces updates to assistive technology. -->
         <section class="results" aria-label="Restaurant results" aria-busy="true">
-          <div class="results-toolbar"><h2 id="results-count" role="status" aria-live="polite">Loading restaurants…</h2><span id="results-note">Explore something delicious</span></div>
+          <div class="results-toolbar"><h2 id="results-count" role="status" aria-live="polite">Loading restaurants…</h2><span id="results-note">Explore something delicious</span><label class="page-size-control" for="page-size">Results per page <select id="page-size"><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label></div>
           <!-- JavaScript inserts cloned restaurant cards here after each successful response. -->
           <div id="results-list"></div>
           <!-- Error and zero-match states are separate: a failed request is not an empty search. -->
           <div id="search-error" role="alert" hidden><p>We couldn’t complete your search. Check your connection and try again.</p><button id="retry-search" type="button">Try again</button></div>
-          <div id="empty-state" hidden><h3>No restaurants found</h3><p>Try another name or location, or reset your filters.</p><button id="empty-reset" type="button">Clear search and filters</button></div>
-          <button id="show-more" class="show-more" type="button" hidden>Show more restaurants</button>
+          <div id="empty-state" hidden><h3>No restaurants found</h3><p>Try another name, widen the distance, enter another address, or reset your filters.</p><button id="empty-reset" type="button">Clear search and filters</button></div>
+          <nav id="pagination" aria-label="Restaurant result pages" hidden></nav>
         </section>
       </div>
       <!-- Built-in details/summary provides an expandable teaching panel without another UI library. -->
       <details class="api-debug" open>
         <summary>API debugger <span>See what each action sends</span></summary>
-        <p>Typing waits 200 ms before searching. Selecting a cuisine sends two requests: one for restaurants and one for cuisine counts without the cuisine restriction. Show more sends one request for the next page.</p>
-        <p>Expand a request to inspect its JSON. Browser round trip includes network and response reading; Algolia processing is server time. Keys and headers are omitted. This log covers application API calls, not photos, styles, or browser preflight requests.</p>
+        <p>Typing waits 200 ms before searching. Selecting a cuisine sends two requests: one for restaurants and one for cuisine counts without the cuisine restriction. Selecting a page sends one request and replaces the visible results.</p>
+        <p>Expand a request to inspect its JSON. Browser round trip includes network and response reading; Algolia processing is server time. Keys, headers, and location coordinates and addresses are omitted. Geo parameters appear when a location is selected. This log covers application API calls, not photos, styles, or browser preflight requests.</p>
         <div class="api-debug-toolbar"><span id="api-log-status" role="status" aria-live="polite">No requests recorded</span><button id="clear-api-log" type="button">Clear log</button></div>
         <div id="api-log" aria-label="Recent API requests"></div>
       </details>
-      <footer>Find a new favorite <span>Restaurant search demo · Assignment dataset</span></footer>
+      <footer>Find a new favorite <span>OpenTable demo · Search by Algolia</span></footer>
     </div>
   </main>
   <!-- Inert markup: invisible until renderCards() clones it and fills fields with textContent. -->
   <template id="result-template">
     <article class="result">
       <div class="result__image-container"><span class="image-fallback" aria-hidden="true">♨</span><img class="result__image" alt="" loading="lazy"></div>
-      <div class="result__text-container"><p class="result__location"></p><h3 class="result__title"></h3><p class="result__rating"></p><p class="result__summary"></p></div>
+      <div class="result__text-container"><p class="result__location"></p><h3 class="result__title"></h3><p class="result__rating"></p><p class="result__summary"></p><p class="result__distance"></p>
+        <!-- Payment text comes from the record; hide the list if none is supplied. -->
+        <ul class="result__payments" aria-label="Payment options" hidden></ul>
+        <!-- JavaScript reveals this only after validating the external booking URL. -->
+        <a class="result__reserve" target="_blank" rel="noopener noreferrer" hidden>Reserve on OpenTable <span aria-hidden="true">↗</span></a>
+      </div>
       <span class="result__price"></span>
     </article>
   </template>

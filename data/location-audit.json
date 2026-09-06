@@ -1,0 +1,41 @@
+{
+  "records": 5000,
+  "countries": {
+    "US": 5000
+  },
+  "valid_coordinate_ranges": 5000,
+  "missing_fields": {
+    "address": 0,
+    "city": 0,
+    "state": 0,
+    "country": 0,
+    "postal_code": 0,
+    "neighborhood": 0,
+    "phone": 0,
+    "phone_number": 0
+  },
+  "duplicate_object_ids": 0,
+  "manual_search_centers": 955,
+  "issues": [
+    {
+      "objectID": "38398",
+      "issue": "city_group_outlier_review",
+      "city": "Kailua",
+      "state": "HI",
+      "distance_from_group_median_km": 266.4
+    },
+    {
+      "objectID": "52420",
+      "issue": "city_group_outlier_review",
+      "city": "Kailua",
+      "state": "HI",
+      "distance_from_group_median_km": 267.3
+    }
+  ],
+  "limitations": [
+    "Range checks do not validate coordinates against a street address or country boundary.",
+    "City outliers are review flags; original coordinates are not corrected or enriched.",
+    "Phone and neighborhood completeness is checked; neither is used to infer coordinates.",
+    "Manual centers are dataset medians, not authoritative geocoded city centers."
+  ]
+}

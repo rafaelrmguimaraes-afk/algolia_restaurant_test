@@ -1,4 +1,5 @@
 """Join the supplied JSON and CSV by objectID. No dependencies or credentials needed."""
+from audit_locations import audit
 import csv
 import json
 from pathlib import Path
@@ -31,9 +32,15 @@ def main():
         records.append(record)
     # Write a separate generated file; do not modify the supplied datasets.
     # Re-running this script replaces the generated output, not the Algolia index.
+    # Audit, then derive manual-location choices without changing supplied coordinates.
+    report, locations = audit(records)
+    if report['valid_coordinate_ranges'] != len(records):
+        raise ValueError('Invalid coordinates found; run audit_locations.py and review the flagged records before indexing.')
     output = ROOT / 'data/restaurants.json'
     output.parent.mkdir(exist_ok=True)
     output.write_text(json.dumps(records, ensure_ascii=False, indent=2), encoding='utf-8')
+    for name, value in [('location-audit.json', report), ('locations.json', locations)]:
+        (output.parent / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(f'Prepared {len(records)} restaurants in {output}')
 
 # Run only when called as a script, not when imported by another Python file.
