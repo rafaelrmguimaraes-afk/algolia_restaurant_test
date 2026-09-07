@@ -1,7 +1,21 @@
 {
-  "searchableAttributes": ["name", "food_type", "city", "neighborhood", "state"],
-  "attributesForFaceting": ["food_type", "filterOnly(price_range)", "filterOnly(payment_options)"],
-  "customRanking": ["desc(stars_count)", "desc(reviews_count)"],
+  "searchableAttributes": [
+    "name",
+    "food_type",
+    "city",
+    "neighborhood",
+    "state",
+    "unordered(dining_style)"
+  ],
+  "attributesForFaceting": [
+    "food_type",
+    "filterOnly(price_range)",
+    "filterOnly(payment_options)"
+  ],
+  "customRanking": [
+    "desc(stars_count)",
+    "desc(reviews_count)"
+  ],
   "attributesToHighlight": [],
   "hitsPerPage": 6,
   "maxValuesPerFacet": 200

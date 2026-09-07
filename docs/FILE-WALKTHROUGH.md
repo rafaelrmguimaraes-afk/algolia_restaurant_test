@@ -33,7 +33,7 @@ Standard JSON does not accept `//` or `/* ... */` comments. Adding `_comment` pr
 | `address`, `postal_code`, `area`, `country` | Preserved location information; not used by current controls or included in the configured searchable attributes. |
 | `phone`, `phone_number` | Contact fields from the source files; retained, not shown in the current UI. |
 | `reserve_url`, `mobile_reserve_url` | The reserve_url supplies the card’s validated OpenTable booking button; mobile_reserve_url is retained but not used. |
-| `dining_style` | Additional descriptive data, retained for possible later use. |
+| `dining_style` | Searchable dining category, with native Algolia synonyms; no sidebar control. |
 
 Generated JSON should normally be recreated with `prepare_data.py`, rather than hand-edited; regeneration overwrites manual changes. Source datasets and duplicate supplied starter files have not been annotated or rewritten.
 

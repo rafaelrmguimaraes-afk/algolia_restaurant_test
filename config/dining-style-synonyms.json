@@ -1,0 +1,66 @@
+[
+  {
+    "objectID": "dining-style-relaxed-dining",
+    "type": "onewaysynonym",
+    "input": "relaxed dining",
+    "synonyms": [
+      "Casual Dining"
+    ]
+  },
+  {
+    "objectID": "dining-style-informal-dining",
+    "type": "onewaysynonym",
+    "input": "informal dining",
+    "synonyms": [
+      "Casual Dining"
+    ]
+  },
+  {
+    "objectID": "dining-style-smart-casual-dining",
+    "type": "onewaysynonym",
+    "input": "smart casual dining",
+    "synonyms": [
+      "Casual Elegant"
+    ]
+  },
+  {
+    "objectID": "dining-style-casual-upscale-dining",
+    "type": "onewaysynonym",
+    "input": "casual upscale dining",
+    "synonyms": [
+      "Casual Elegant"
+    ]
+  },
+  {
+    "objectID": "dining-style-upscale-dining",
+    "type": "onewaysynonym",
+    "input": "upscale dining",
+    "synonyms": [
+      "Fine Dining"
+    ]
+  },
+  {
+    "objectID": "dining-style-gourmet-dining",
+    "type": "onewaysynonym",
+    "input": "gourmet dining",
+    "synonyms": [
+      "Fine Dining"
+    ]
+  },
+  {
+    "objectID": "dining-style-homestyle",
+    "type": "onewaysynonym",
+    "input": "homestyle",
+    "synonyms": [
+      "Home Style"
+    ]
+  },
+  {
+    "objectID": "dining-style-home-style-cooking",
+    "type": "onewaysynonym",
+    "input": "home style cooking",
+    "synonyms": [
+      "Home Style"
+    ]
+  }
+]

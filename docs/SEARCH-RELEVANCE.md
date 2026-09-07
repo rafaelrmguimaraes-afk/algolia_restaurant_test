@@ -23,3 +23,17 @@ The active Rule is exported in `config/price-rules.json`. Grouped Rules files ar
 ## Remaining validation
 
 Record expected and actual positions for exact, partial, concatenated and misspelled restaurant names. Retest combinations with known sidebar selections. Complete desktop/mobile pagination and location checks. Automated mocked tests cover implementation behavior, not a complete live relevance benchmark.
+
+## Dining-style search — September 7, 2026
+
+Added `unordered(dining_style)` to the end of the live searchable attribute list, preserving existing priorities. Eight one-way synonyms are in `config/dining-style-synonyms.json`; apply them with `python3 scripts/configure_dining_search.py --index restaurants`. No restaurant records were changed and no UI filter was added.
+
+| Query | Direct Algolia matches | Finding |
+| --- | ---: | --- |
+| relaxed dining | 2203 | First 100: Casual Dining |
+| smart casual dining | 2130 | First 100: Casual Elegant |
+| upscale dining | 641 | First 100: Fine Dining |
+| homestyle | 28 | 26 Home Style; 2 other styles matched searchable text |
+| upscale dining Italian | 100 | First 100: Fine Dining |
+
+Live browser test: `upscale dining Italian` returned 97 restaurants, with The Cellar Restaurant first. The browser converts Italian to an exact food_type refinement, explaining the difference from the direct text-only query. Synonyms expand text matching across searchable attributes; they do not guarantee a strict dining_style category. For example, Fine Dining returned 698 total because other searchable fields can also match. Restaurant name remains the highest-priority searchable attribute.
