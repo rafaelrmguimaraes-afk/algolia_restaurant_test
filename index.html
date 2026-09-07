@@ -6,9 +6,10 @@
   <meta name="description" content="Find your next restaurant by name, cuisine, and location.">
   <title>OpenTable · Restaurant Search</title>
   <link rel="icon" href="assets/favicon.ico">
-  <link rel="stylesheet" href="index.css?v=price-band1">
+  <link rel="stylesheet" href="index.css?v=mobile2">
   <!-- defer preserves script order and waits for HTML parsing: logger first, then app. -->
   <script src="debug.js" defer></script>
+  <script src="mobile-ui.js" defer></script>
   <script src="location.js?v=osm1" defer></script>
 
   <script src="sentence-search.js?v=pizza1" defer></script>
@@ -35,7 +36,7 @@
             <div id="address-panel" class="address-panel" hidden>
               <div class="address-panel-heading"><span>Search near an address</span><button id="close-address" type="button" aria-label="Close address lookup">×</button></div>
             <form id="address-form" class="address-form">
-              <label class="sr-only" for="location-address">Complete US street address</label>
+              <label class="sr-only" for="location-address">US city, ZIP code, or street</label>
               <input id="location-address" type="text" placeholder="City, ZIP, or street" maxlength="100" autocomplete="off" aria-describedby="location-privacy">
               <button id="apply-address" type="submit">Find</button>
             </form>
@@ -61,11 +62,16 @@
       <div class="page__content">
         <!-- Fieldsets/legends group related controls accessibly. Cuisine checkboxes come from Algolia facets. -->
         <aside class="filter" aria-label="Refine restaurants">
+          <details id="mobile-filters" open>
+            <summary class="mobile-filter-toggle">Filters <span>Cuisine, price &amp; more</span></summary>
+            <div class="filter-body">
           <div class="filter-heading"><h2>Refine your search</h2><button id="clear-all" type="button">Reset</button></div>
           <fieldset class="filter__section"><legend>Cuisine / Food type</legend><div id="cuisine-filters"></div></fieldset>
           <fieldset class="filter__section"><legend>Minimum rating</legend><label for="rating" class="sr-only">Minimum rating</label><select id="rating"><option value="0">All ratings</option><option value="3">★ 3.0 and up</option><option value="4">★ 4.0 and up</option><option value="4.5">★ 4.5 and up</option></select></fieldset>
           <fieldset class="filter__section"><legend>Price per person</legend><label for="price" class="sr-only">Price per person</label><select id="price"><option value="">All prices</option><option>$30 and under</option><option>$31 to $50</option><option>$50 and over</option></select></fieldset>
           <fieldset class="filter__section"><legend>Payment options</legend><label for="payment" class="sr-only">Payment options</label><select id="payment"><option value="">All payment options</option><option>AMEX</option><option>Discover</option><option>MasterCard</option><option>Visa</option></select></fieldset>
+            </div>
+          </details>
         </aside>
         <!-- aria-busy signals loading; the live result count announces updates to assistive technology. -->
         <section class="results" aria-label="Restaurant results" aria-busy="true">
@@ -79,7 +85,7 @@
         </section>
       </div>
       <!-- Built-in details/summary provides an expandable teaching panel without another UI library. -->
-      <details class="api-debug" open>
+      <details class="api-debug">
         <summary>API debugger <span>See what each action sends</span></summary>
         <p>Typing waits 200 ms before searching. Selecting a cuisine sends two requests: one for restaurants and one for cuisine counts without the cuisine restriction. Selecting a page sends one request and replaces the visible results.</p>
         <p>Expand a request to inspect its JSON. Browser round trip includes network and response reading; Algolia processing is server time. Keys, headers, and location coordinates and addresses are omitted. Geo parameters appear when a location is selected. This log covers application API calls, not photos, styles, or browser preflight requests.</p>

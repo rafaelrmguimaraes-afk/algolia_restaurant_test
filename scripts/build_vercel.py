@@ -6,7 +6,7 @@ def build():
     output = ROOT / 'dist'
     if output.exists(): shutil.rmtree(output)
     output.mkdir()
-    for name in ['index.html','index.css','index.js','location.js','sentence-search.js','debug.js','assets/favicon.ico','assets/images/background.png','assets/images/background_@2X.png']:
+    for name in ['index.html','index.css','index.js','mobile-ui.js','location.js','sentence-search.js','debug.js','assets/favicon.ico','assets/images/background.png','assets/images/background_@2X.png']:
         source = ROOT / name
         if source.exists():
             target = output / name

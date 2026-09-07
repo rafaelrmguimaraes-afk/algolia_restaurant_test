@@ -806,3 +806,68 @@ button:disabled { cursor:wait; opacity:.6; }
 /* Display the same source price bands used by filtering, including on mobile. */
 .result__price { white-space:nowrap; font-size:13px; }
 @media(max-width:700px) { .result { flex-wrap:wrap; } .result__price { display:block; margin-left:auto; } }
+
+/* Mobile refinement disclosure keeps restaurants close to the search.
+   Desktop retains the existing sidebar and square search controls. */
+.mobile-filter-toggle { display:none; }
+@media(max-width:700px) {
+  .page { padding:0; }
+  .page__container { border:0; border-radius:0; box-shadow:none; }
+  .search-bar { padding:22px 16px 18px; }
+  .brand { font-size:22px; }
+  .search-bar h1 { max-width:320px; margin:16px auto 20px; font-size:28px; line-height:1.2; }
+  .search-bar__container { min-height:52px; }
+  .search-bar__input, .search-bar__input::placeholder { font-size:16px; }
+  .search-bar__input { padding:10px 8px; }
+  .search-button { padding:0 14px; min-height:44px; }
+  .location-prompt { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  #use-location, #toggle-address { min-height:44px; padding:10px 6px; font-size:13px; }
+  /* An inline panel expands the header instead of covering results or clipping. */
+  .address-panel { position:static; transform:none; width:100%; max-width:none; margin-top:12px; padding:14px; }
+  .address-form { flex-wrap:nowrap; }
+  #location-address { flex-basis:auto; width:0; font-size:16px; padding:10px 8px; }
+  #apply-address, #close-address, #clear-location { min-height:44px; }
+  #close-address { min-width:44px; }
+  #location-radius { font-size:16px; min-height:44px; }
+  #address-matches button { min-height:44px; }
+  #sentence-filters button { min-height:44px; }
+  .filter { display:block; padding:0; background:#f6f9fb; }
+  .mobile-filter-toggle { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px; min-height:56px; font-weight:600; cursor:pointer; list-style:none; }
+  .mobile-filter-toggle::-webkit-details-marker { display:none; }
+  .mobile-filter-toggle span { margin-left:auto; color:var(--muted); font-weight:400; font-size:12px; }
+  .mobile-filter-toggle::after { content:'+'; font-size:22px; line-height:1; }
+  #mobile-filters[open] > summary::after { content:'−'; }
+  summary:focus-visible { outline:3px solid #e69b45; outline-offset:-3px; }
+  .filter-body { padding:0 16px 20px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px 12px; }
+  .filter-heading, .filter-body > fieldset:first-of-type { grid-column:1/-1; }
+  .filter__section { margin:0; }
+  #cuisine-filters { max-height:230px; }
+  .cuisine-option { min-height:44px; }
+  .cuisine-option input { width:20px; height:20px; }
+  .filter-body select { font-size:16px; min-height:44px; }
+  #clear-all { min-height:44px; }
+  .results { padding:18px 16px; min-width:0; }
+  .results-toolbar { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; padding-bottom:16px; }
+  .results-toolbar h2 { grid-column:1/-1; font-size:18px; }
+  #results-note { font-size:11px; }
+  .page-size-control { font-size:12px; gap:6px; }
+  #page-size { font-size:16px; min-height:44px; }
+  /* Place photo and headline together, then give metadata and booking full width. */
+  .result { display:grid; grid-template-columns:64px minmax(0,1fr) auto; gap:6px 12px; align-items:start; padding:20px 0; }
+  .result__text-container { display:contents; }
+  .result__image-container { grid-column:1; grid-row:1 / 4; width:64px; height:76px; }
+  .result__location { grid-column:2; grid-row:1; margin:0; font-size:10px; letter-spacing:.5px; }
+  .result__title { grid-column:2; grid-row:2; margin:0; font-size:17px; }
+  .result__rating { grid-column:2 / -1; grid-row:3; margin:0; font-size:13px; }
+  .result__price { grid-column:3; grid-row:1 / 3; margin:0; font-size:14px; color:var(--ink); }
+  .result__summary, .result__distance, .result__payments, .result__reserve { grid-column:1 / -1; }
+  .result__summary { margin-top:6px; }
+  .result__distance:empty { display:none; }
+  .result__payments { margin-top:4px; gap:5px; }
+  .payment-badge { font-size:11px; }
+  .result__reserve { display:flex; justify-content:center; min-height:44px; margin-top:8px; border-radius:0; }
+  #pagination { gap:4px; }
+  #pagination button { min-width:44px; min-height:44px; padding:6px; }
+  .api-debug { padding:16px; }
+  footer { padding:16px; }
+}

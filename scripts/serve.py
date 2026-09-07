@@ -35,7 +35,7 @@ class PublicFiles(SimpleHTTPRequestHandler):
             self.wfile.write(body)
             return
         # Serve only these exact files. A generic folder server would also expose .env and source data.
-        allowed = {'/', '/index.html', '/index.css', '/index.js', '/debug.js', '/location.js', '/sentence-search.js', '/assets/favicon.ico',
+        allowed = {'/', '/index.html', '/index.css', '/index.js', '/debug.js', '/mobile-ui.js', '/location.js', '/sentence-search.js', '/assets/favicon.ico',
                    '/assets/images/background.png', '/assets/images/background_@2X.png'}
         if path not in allowed:
             self.send_error(404)
