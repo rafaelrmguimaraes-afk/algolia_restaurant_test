@@ -10,7 +10,8 @@
   "attributesForFaceting": [
     "food_type",
     "filterOnly(price_range)",
-    "filterOnly(payment_options)"
+    "filterOnly(payment_options)",
+    "filterOnly(state)"
   ],
   "customRanking": [
     "desc(stars_count)",

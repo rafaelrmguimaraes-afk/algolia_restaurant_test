@@ -18,7 +18,8 @@ let activeRequest;
 // Convert the current controls into Algolia request JSON. Page 0 is the first page.
 // includeCuisine=false is used only for the extra query that counts alternative cuisines.
 function searchParameters(page, includeCuisine = true) {
-  const facetFilters = [];
+  const locationParameters = restaurantLocation.parameters();
+  const facetFilters = [...(locationParameters.facetFilters || [])];
   // OR within cuisines; AND between cuisine, price, payment, and rating.
   if (includeCuisine && state.cuisines.size && !sentenceSearch.parse(searchInput.value).tokens.some(t => t.kind === 'cuisine')) {
     facetFilters.push([...state.cuisines].map(value => `food_type:${value}`));
@@ -38,7 +39,7 @@ function searchParameters(page, includeCuisine = true) {
     // Ask for counts by cuisine; highlighting is disabled because cards display plain text.
     facets: ['food_type'], maxValuesPerFacet: 200, attributesToHighlight: [],
     // Both the main and alternate-cuisine queries must use the same search center and radius.
-    ...restaurantLocation.parameters()
+    ...locationParameters, facetFilters
   };
 }
 

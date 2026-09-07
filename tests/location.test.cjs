@@ -63,5 +63,16 @@ const location=context.restaurantLocation;
  pending.shift().resolve({ok:true,status:200,json:async()=>({matches:[]})});
  await new Promise(resolve=>setImmediate(resolve));
  assert.match(node('#location-status').textContent,/No location match/);
+ for (const code of 'AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC'.split(' ')) {
+   node('#location-address').value=' ' + code.toLowerCase() + ' ';
+   node('#address-form').listeners.submit({preventDefault(){}});
+   assert.equal(location.parameters().facetFilters[0], 'state:' + code);
+   assert.equal(location.parameters().aroundLatLng, undefined);
+   assert.equal(node('#location-distance').hidden, true);
+   assert.equal(location.distanceText({}), '');
+ }
+ assert.equal(pending.length,0,'State codes bypass geocoder');
+ location.clear(false);
+ assert.equal(Object.keys(location.parameters()).length,0);
  console.log('PASS: no automatic location prompt, address confirmation/fallback, radius, denial/timeout, device rounding/redaction, distances, stale callback and reset.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

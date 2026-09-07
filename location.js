@@ -12,19 +12,21 @@ window.restaurantLocation = (() => {
     addressToggle.setAttribute('aria-expanded', String(open));
     if (focus) (open ? addressInput : addressToggle).focus();
   }
+  // USPS codes select an entire state, not a geocoder's point near its center.
+  const states = Object.fromEntries('AL:Alabama|AK:Alaska|AZ:Arizona|AR:Arkansas|CA:California|CO:Colorado|CT:Connecticut|DE:Delaware|FL:Florida|GA:Georgia|HI:Hawaii|ID:Idaho|IL:Illinois|IN:Indiana|IA:Iowa|KS:Kansas|KY:Kentucky|LA:Louisiana|ME:Maine|MD:Maryland|MA:Massachusetts|MI:Michigan|MN:Minnesota|MS:Mississippi|MO:Missouri|MT:Montana|NE:Nebraska|NV:Nevada|NH:New Hampshire|NJ:New Jersey|NM:New Mexico|NY:New York|NC:North Carolina|ND:North Dakota|OH:Ohio|OK:Oklahoma|OR:Oregon|PA:Pennsylvania|RI:Rhode Island|SC:South Carolina|SD:South Dakota|TN:Tennessee|TX:Texas|UT:Utah|VT:Vermont|VA:Virginia|WA:Washington|WV:West Virginia|WI:Wisconsin|WY:Wyoming|DC:District of Columbia'.split('|').map(pair => pair.split(':')));
   let addressRequest;
   let selected = null;
   let lookupId = 0;
   let onChange = () => {};
 
   function describe() {
-    radiusInput.disabled = !selected;
-    document.querySelector('#location-distance').hidden = !selected;
+    radiusInput.disabled = !selected || selected.source === 'state';
+    document.querySelector('#location-distance').hidden = !selected || selected.source === 'state';
     document.querySelector('#clear-location').hidden = !selected;
     if (!selected) {
       status.textContent = 'Showing all locations';
     } else {
-      status.textContent = `Near ${selected.label}`;
+      status.textContent = selected.source === 'state' ? `Anywhere in ${selected.label} (${selected.code})` : `Near ${selected.label}`;
     }
   }
 
@@ -53,6 +55,14 @@ window.restaurantLocation = (() => {
       status.textContent = 'Enter a US city, ZIP code, street, or combination.'; return;
     }
     cancelLookup();
+    const code = address.toUpperCase();
+    if (states[code]) {
+      selected = {source:'state', code, label:states[code]};
+      addressInput.value = code;
+      showAddress(false);
+      describe(); onChange('State selected: ' + code);
+      return;
+    }
     const id = lookupId;
     addressRequest = new AbortController();
     document.querySelector('#apply-address').disabled = true;
@@ -126,6 +136,7 @@ window.restaurantLocation = (() => {
 
   function parameters() {
     if (!selected) return {};
+    if (selected.source === 'state') return {facetFilters: [`state:${selected.code}`]};
     return { aroundLatLng: `${selected.lat},${selected.lng}`,
       aroundRadius: radiusInput.value === 'all' ? 'all' : Number(radiusInput.value),
       // Nearby points within the same distance band can be ordered by later ranking criteria.
@@ -139,7 +150,7 @@ window.restaurantLocation = (() => {
   }
 
   function distanceText(restaurant) {
-    if (!selected) return '';
+    if (!selected || selected.source === 'state') return '';
     const meters = restaurant._rankingInfo?.matchedGeoLocation?.distance;
     if (!Number.isFinite(meters)) return 'Distance unavailable';
     const miles = meters / 1609.344;

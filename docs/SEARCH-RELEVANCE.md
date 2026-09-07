@@ -37,3 +37,9 @@ Added `unordered(dining_style)` to the end of the live searchable attribute list
 | upscale dining Italian | 100 | First 100: Fine Dining |
 
 Live browser test: `upscale dining Italian` returned 97 restaurants, with The Cellar Restaurant first. The browser converts Italian to an exact food_type refinement, explaining the difference from the direct text-only query. Synonyms expand text matching across searchable attributes; they do not guarantee a strict dining_style category. For example, Fine Dining returned 698 total because other searchable fields can also match. Restaurant name remains the highest-priority searchable attribute.
+
+## Whole-state location search — September 7, 2026
+
+All 50 USPS state codes and DC are recognized case-insensitively in the location field. A standalone code bypasses geocoding and applies an Algolia state facet filter, with no radius or distance labels. City/ZIP/street inputs continue using nearby search. Full names remain geocoder inputs and can be ambiguous (New York city versus state); use NY for statewide results.
+
+Browser checks with live Algolia: NY returned 1,086 records and FL returned 238; all returned records on the inspected first pages had the requested state. FL combined with `cheap Italian accepting Visa` returned 29. Clear location restored all-location mode. Unit checks cover all 51 codes, lowercase/whitespace, no geocoder call and reset.
