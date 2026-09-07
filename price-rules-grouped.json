@@ -1,0 +1,124 @@
+[
+  {
+    "objectID": "demo-price-cheap",
+    "conditions": [
+      {
+        "pattern": "cheap",
+        "anchoring": "contains"
+      },
+      {
+        "pattern": "affordable",
+        "anchoring": "contains"
+      },
+      {
+        "pattern": "inexpensive",
+        "anchoring": "contains"
+      },
+      {
+        "pattern": "budget-friendly",
+        "anchoring": "contains"
+      }
+    ],
+    "consequence": {
+      "params": {
+        "filters": "price_range:\"$30 and under\"",
+        "query": {
+          "edits": [
+            {
+              "type": "remove",
+              "delete": "cheap"
+            },
+            {
+              "type": "remove",
+              "delete": "affordable"
+            },
+            {
+              "type": "remove",
+              "delete": "inexpensive"
+            },
+            {
+              "type": "remove",
+              "delete": "budget-friendly"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "objectID": "demo-price-moderate",
+    "conditions": [
+      {
+        "pattern": "moderate",
+        "anchoring": "contains"
+      },
+      {
+        "pattern": "mid-priced",
+        "anchoring": "contains"
+      },
+      {
+        "pattern": "moderately priced",
+        "anchoring": "contains"
+      }
+    ],
+    "consequence": {
+      "params": {
+        "filters": "price_range:\"$31 to $50\"",
+        "query": {
+          "edits": [
+            {
+              "type": "remove",
+              "delete": "moderate"
+            },
+            {
+              "type": "remove",
+              "delete": "mid-priced"
+            },
+            {
+              "type": "remove",
+              "delete": "moderately priced"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "objectID": "demo-price-expensive",
+    "conditions": [
+      {
+        "pattern": "expensive",
+        "anchoring": "contains"
+      },
+      {
+        "pattern": "pricey",
+        "anchoring": "contains"
+      },
+      {
+        "pattern": "high-priced",
+        "anchoring": "contains"
+      }
+    ],
+    "consequence": {
+      "params": {
+        "filters": "price_range:\"$50 and over\"",
+        "query": {
+          "edits": [
+            {
+              "type": "remove",
+              "delete": "expensive"
+            },
+            {
+              "type": "remove",
+              "delete": "pricey"
+            },
+            {
+              "type": "remove",
+              "delete": "high-priced"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

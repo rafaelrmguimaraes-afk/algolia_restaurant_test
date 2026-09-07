@@ -2,7 +2,7 @@
 
 A restaurant search prototype for the [Algolia Solutions Engineer hiring assignment](https://github.com/algolia/solutions-hiring-assignment/). It combines the supplied restaurant files into an Algolia index and demonstrates a path from searching or browsing to an OpenTable reservation link.
 
-**Submission status:** the source is available on [GitHub](https://github.com/rafaelrmguimaraes-afk/algolia_restaurant_test). A public demo URL and confirmation of Algolia Support Access are still pending. This README is a draft for review.
+**Submission status:** the source is available on [GitHub](https://github.com/rafaelrmguimaraes-afk/algolia_restaurant_test). A public demo URL and confirmation of Algolia Support Access are still pending.
 
 ## The customer problem
 
@@ -192,3 +192,11 @@ Historical images and reservation links may no longer be available. Image fallba
 I kept the original data separate from the generated index records, used Algolia for matching, facets, and geo-search, and kept interpretation and presentation logic small enough to inspect. The demo supports both known-item search and discovery, with a direct reservation action. The key trade-offs are rule-based sentence interpretation, price bands rather than exact prices, and an external geocoder for location text. Search quality is evaluated separately from whether an API request succeeds.
 
 AI tools assisted implementation and debugging. The code, API debugger, tests, and documented decisions are intended to make the architecture and trade-offs reviewable and explainable.
+
+## Native price Rule: verified configuration
+
+The live `restaurants` index has a verified `affordable` Rule: it removes that word and applies `price_range:"$30 and under"`. Direct API testing returned 585 matches for `affordable Italian`; all 100 inspected records used that band. See [the relevance report](docs/SEARCH-RELEVANCE.md).
+
+`config/price-rules.json` exports the working Rule. Run `python3 scripts/configure_rules.py` to apply it to the index configured in `.env`; this is a write operation and requires Rules permissions. It preserves unrelated Rules and restaurant records.
+
+`config/price-rules-grouped.json` and the root `price-rules-grouped.json` are proposed import files, not the active configuration. The earlier larger migration hit the account Rules quota. The browser still interprets cheap/moderate/expensive; affordable reaches Algolia as text and uses the native Rule. The full native migration is not complete.

@@ -1,0 +1,24 @@
+[
+  {
+    "conditions": [
+      {
+        "anchoring": "contains",
+        "pattern": "affordable",
+        "alternatives": true
+      }
+    ],
+    "consequence": {
+      "params": {
+        "query": {
+          "remove": [
+            "affordable"
+          ]
+        },
+        "filters": "price_range:\"$30 and under\""
+      },
+      "filterPromotes": true
+    },
+    "enabled": true,
+    "objectID": "qr-1788734705524"
+  }
+]
