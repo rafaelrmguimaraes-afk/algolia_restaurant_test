@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo No frontend dependencies required",
+  "buildCommand": "python3 scripts/build_vercel.py",
+  "outputDirectory": "dist",
+  "rewrites": [{"source": "/config.json", "destination": "/api/config"}],
+  "functions": {
+    "api/**/*.py": {
+      "maxDuration": 30,
+      "excludeFiles": "{.env,.env.*,dataset/**,data/**,tests/**,docs/**,node_modules/**,project-files/**,project-files.zip}"
+    }
+  }
+}

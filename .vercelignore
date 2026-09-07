@@ -1,0 +1,10 @@
+.env
+.env.*
+node_modules
+.git
+__pycache__
+dist
+project-files
+project-files.zip
+dataset
+data

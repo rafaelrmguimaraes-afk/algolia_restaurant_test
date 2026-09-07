@@ -85,7 +85,7 @@ window.restaurantLocation = (() => {
       }
     } catch (error) {
       apiDebug.finish(log, {status:error.name === 'AbortError' ? 'Cancelled in browser' : httpStatus ? `HTTP ${httpStatus} · failed` : 'Network error'});
-      if (id === lookupId && error.name !== 'AbortError') status.textContent = 'Address lookup is unavailable. Try again or use your location. Your current search area is unchanged.';
+      if (id === lookupId && error.name !== 'AbortError') status.textContent = httpStatus === 429 ? 'Location search is busy. Wait a moment and click Find again.' : 'Address lookup is unavailable. Try again or use your location. Your current search area is unchanged.';
     } finally {
       if (id === lookupId) document.querySelector('#apply-address').disabled = false;
     }
