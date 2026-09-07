@@ -9,12 +9,21 @@ from urllib.request import Request, urlopen
 from config import tls_context
 from geocode import lookup_address
 class Busy(Exception): pass
+class NotConfigured(RuntimeError): pass
 
 def redis(*command):
-    endpoint = os.environ.get('UPSTASH_REDIS_REST_URL','')
-    token = os.environ.get('UPSTASH_REDIS_REST_TOKEN','')
-    if not endpoint.startswith('https://') or not token:
-        raise RuntimeError('Shared location service not configured')
+    # Vercel Marketplace uses KV_*; direct Upstash setup uses UPSTASH_* .
+    # Select a complete pair, never mix credentials from different stores.
+    endpoint, token = '', ''
+    for url_name, token_name in [('UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN'),
+                                 ('KV_REST_API_URL','KV_REST_API_TOKEN')]:
+        candidate = os.environ.get(url_name, '').strip()
+        credential = os.environ.get(token_name, '').strip()
+        if candidate.startswith('https://') and credential:
+            endpoint, token = candidate, credential
+            break
+    if not endpoint:
+        raise NotConfigured('Shared location service not configured')
     request = Request(endpoint, data=json.dumps(command).encode(), headers={
         'Authorization':'Bearer '+token, 'Content-Type':'application/json'})
     with urlopen(request, context=tls_context(), timeout=5) as response:

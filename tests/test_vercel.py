@@ -1,5 +1,5 @@
 import sys, pathlib, unittest, json
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]/'scripts'))
 import shared_geocode as geo
 class DeploymentTests(unittest.TestCase):
@@ -21,6 +21,16 @@ class DeploymentTests(unittest.TestCase):
         with patch.dict('os.environ',{},clear=True),patch.object(geo,'lookup_address') as provider:
             with self.assertRaises(RuntimeError):geo.lookup_shared('Waltham')
             provider.assert_not_called()
+    def test_marketplace_credentials(self):
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = b'{"result":"PONG"}'
+        with patch.dict('os.environ', {'KV_REST_API_URL':'https://example.invalid', 'KV_REST_API_TOKEN':'test-token'}, clear=True), patch.object(geo, 'urlopen', return_value=response) as request:
+            self.assertEqual(geo.redis('PING'), 'PONG')
+            self.assertEqual(request.call_args.args[0].full_url, 'https://example.invalid')
+    def test_incomplete_pairs_are_not_mixed(self):
+        with patch.dict('os.environ', {'UPSTASH_REDIS_REST_URL':'https://example.invalid', 'KV_REST_API_TOKEN':'test-token'}, clear=True), patch.object(geo, 'urlopen') as request:
+            with self.assertRaises(geo.NotConfigured): geo.redis('PING')
+            request.assert_not_called()
     def test_public_output(self):
         root=pathlib.Path(__file__).resolve().parents[1]/'dist'
         self.assertTrue((root/'index.html').exists())

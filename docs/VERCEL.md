@@ -1,6 +1,6 @@
 # Vercel setup
 
-Prepared, not yet deployed or verified on Vercel. Local startup stays `python3 scripts/serve.py`.
+Deployed on Vercel. Search configuration is verified; hosted address lookup still requires a connected Redis store. Local startup stays `python3 scripts/serve.py`.
 
 ## Import settings
 
@@ -17,6 +17,8 @@ Add for Preview and Production:
 - UPSTASH_REDIS_REST_TOKEN
 
 Do not add the Algolia write/admin key. Do not upload .env. The configuration endpoint returns only the three public Algolia fields.
+
+Vercel Marketplace may instead provide `KV_REST_API_URL` and `KV_REST_API_TOKEN`; the endpoint accepts either complete pair. After connecting the store for Production and Preview, redeploy so the function receives the new variables. A `location_not_configured` response means neither complete pair is available.
 
 Connect an Upstash Redis store through Vercel's Marketplace or supply its REST URL/token. Review the selected provider plan before provisioning. Preview and production must use the same store to share the Nominatim request limit. No store has been created by this preparation step.
 
