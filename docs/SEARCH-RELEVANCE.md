@@ -16,13 +16,13 @@ The active Rule is exported in `config/price-rules.json`. Grouped Rules files ar
 
 ## User-reported checks
 
-- `Chaimmbers Walk Caf` found Chambers Walk Cafe & Catering; position not recorded.
+- `Chaimmbers Walk Caf` returned Chambers Walk Cafe & Catering as the only result (rank 1), confirmed by the author on September 9, 2026.
 - Device location worked in Chrome; the in-app browser timed out.
 - ZIP 33101 and Waltham, MA location lookup worked.
 
-## Remaining validation
+## Validation scope
 
-Record expected and actual positions for exact, partial, concatenated and misspelled restaurant names. Retest combinations with known sidebar selections. Complete desktop/mobile pagination and location checks. Automated mocked tests cover implementation behavior, not a complete live relevance benchmark.
+On September 9, 2026, the author reported all eight manual smoke checks passing locally and on Vercel, including combined filters, pagination, reset, typo search, location lookup, and a narrow browser layout. All six automated test suites passed locally. See the README for the individual outcomes. The typo search above has a confirmed rank of 1; exact positions were not documented for every other query type. A broader benchmark could record those positions alongside explicit filter and radius settings. Automated mocked tests cover implementation behavior, not a complete live relevance benchmark.
 
 ## Dining-style search — September 7, 2026
 

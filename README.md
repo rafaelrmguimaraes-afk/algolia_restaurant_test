@@ -2,7 +2,9 @@
 
 A restaurant search prototype for the [Algolia Solutions Engineer hiring assignment](https://github.com/algolia/solutions-hiring-assignment/). It combines the supplied restaurant files into an Algolia index and demonstrates a path from searching or browsing to an OpenTable reservation link.
 
-**Submission status:** the source is available on [GitHub](https://github.com/rafaelrmguimaraes-afk/algolia_restaurant_test). A public demo URL and confirmation of Algolia Support Access are still pending.
+[Live demo on Vercel](https://algolia-restaurant-test.vercel.app) · [Source on GitHub](https://github.com/rafaelrmguimaraes-afk/algolia_restaurant_test)
+
+The production demo is publicly accessible without a Vercel login (checked September 9, 2026). On September 9, 2026, six automated test suites passed locally, and the author reported all eight manual smoke checks passing both locally and on Vercel. Algolia Support Access was confirmed enabled by the author on September 9, 2026. The evaluation includes functional checks and the relevance evidence linked below; the author confirmed that the typo search returned the intended restaurant as its only result (rank 1).
 
 ## The customer problem
 
@@ -17,7 +19,7 @@ These are design goals, not measured conversion improvements. The demo links to 
 
 ## Run locally
 
-Requirements: Python 3.10+, internet access, and an Algolia application with search credentials. Node.js is needed only for JavaScript tests. No npm installation is required for the demo.
+Requirements: Python (3.12 matches the configured deployment runtime), internet access, and an Algolia application with search credentials. The local server and the six test suites below also passed using Python 3.9.6 and Node.js 24.15.0 on September 9, 2026. Node.js is needed for JavaScript tests and the optional `npm start` shortcut; the demo itself requires no npm dependency installation.
 
 ```sh
 git clone https://github.com/rafaelrmguimaraes-afk/algolia_restaurant_test.git
@@ -30,14 +32,23 @@ Fill in `.env` locally:
 - `ALGOLIA_APP_ID`: your application ID.
 - `ALGOLIA_INDEX_NAME`: the restaurant index, currently `restaurants`.
 - `ALGOLIA_SEARCH_API_KEY`: a search-only key restricted to the intended index.
-- `ALGOLIA_WRITE_API_KEY`: a private key with the permissions needed by the import script.
+- `ALGOLIA_WRITE_API_KEY`: needed only when importing records or changing index settings, Rules, or synonyms. It is not required to run the demo against an existing index.
 
-If creating your own index, prepare and import the data first:
+For an existing configured index, skip the import commands. To populate your own index, set the write key and run:
 
 ```sh
 python3 scripts/prepare_data.py
 python3 scripts/index_data.py
 ```
+
+The importer applies `config/algolia-settings.json`. To reproduce the additional dining-style synonyms and price Rule, use a key with the corresponding permissions and run:
+
+```sh
+python3 scripts/configure_dining_search.py --index YOUR_INDEX_NAME
+python3 scripts/configure_rules.py
+```
+
+Replace `YOUR_INDEX_NAME` with your index name. The Rules script uses the index in `.env`.
 
 Start the demo:
 
@@ -78,17 +89,18 @@ The implementation uses plain HTML, CSS, JavaScript, and a small Python server t
 3. Algolia returns restaurant hits, counts, and pagination information; JavaScript renders the cards.
 4. Optional location lookup runs through Python. After the visitor confirms a location, its coordinates become Algolia geo-search parameters.
 
-The write key stays on the server and is used only for indexing. `.env` is excluded from Git. The browser search key is public by design and must not be an admin key.
+The write key is used only by local administration scripts for records, settings, Rules, and synonyms; it is not needed by the deployed application. `.env` is excluded from Git. The browser search key is public by design and must not be an admin key.
 
 | Action | Requests |
 | --- | --- |
-| Initial page load | Local `GET /config.json`, followed by an Algolia search |
+| Initial page load | Same-origin `GET /config.json`, followed by an Algolia search |
 | Typing | Search after a 200 ms pause; stale responses are ignored |
 | Cuisine checkbox selection | Results query plus a query omitting cuisine restrictions for alternative facet counts |
 | Page navigation | One query for the selected zero-based page |
 | Results per page | Return to page one with 20, 50, or 100 hits per page |
 | Cheapest search | Three count-only price-band queries, then results in the lowest matching band; an additional facet query may occur with checked cuisines |
-| Manual location | `POST /api/geocode`, server-side geocoding, then an Algolia search after confirmation |
+| City, ZIP, or street | `POST /api/geocode`, server-side geocoding, then an Algolia search after confirmation |
+| Two-letter US state code | Algolia state filter; no geocoding request or radius |
 | Device location | Browser permission request; on success, an Algolia search with rounded coordinates |
 
 The API debugger displays the latest 30 application requests, their triggers, bodies, status, and timing. It omits keys, headers, and location coordinates. Browser round-trip timing and Algolia processing time are different measurements. The debugger does not capture every browser resource request.
@@ -97,14 +109,20 @@ The API debugger displays the latest 30 application requests, their triggers, bo
 
 The repository configuration is in `config/algolia-settings.json`:
 
-- **Searchable fields:** `name`, `food_type`, `city`, `neighborhood`, `state`, in that order. Names receive attribute priority for known-item searches.
-- **Facets:** `food_type`; filter-only `price_range` and `payment_options`.
+- **Searchable fields:** `name`, `food_type`, `city`, `neighborhood`, `state`, then `unordered(dining_style)`. Names receive attribute priority for known-item searches; dining-style matching has lower attribute priority.
+- **Facets:** `food_type`; filter-only `price_range`, `payment_options`, and `state`.
 - **Numeric filtering:** minimum `stars_count`.
 - **Custom ranking:** descending `stars_count`, then `reviews_count`, after the preceding relevance criteria. This is not a universal highest-rating sort.
 - **Typo behavior:** rely on Algolia's existing/default matching rather than implementing a general spelling engine.
-- **Geo-search:** `_geoloc` records, `aroundLatLng`, `aroundRadius`, and `aroundPrecision` support nearby results. Distances are approximate straight-line distances.
+- **Geo-search:** Algolia uses indexed `_geoloc` coordinates with `aroundLatLng`, `aroundRadius`, and `aroundPrecision` to find nearby restaurants. City, ZIP, and street lookups use Nominatim, a geocoding service based on [OpenStreetMap](https://www.openstreetmap.org/) data, to obtain the search coordinates. Device location comes from the browser. Distances are approximate straight-line distances.
 
 Cuisine checkbox choices use OR. Separate price, payment, and rating restrictions use AND. The original combined Cuisine / Food type list is retained because the source does not consistently provide those as independent dimensions.
+
+### Algolia Rules and synonyms
+
+The `affordable` Rule removes that word and applies `price_range:"$30 and under"`. In direct API checks on September 7, 2026, `affordable Italian` returned 585 matches; all 100 inspected records had that price band. The Rule is exported in `config/price-rules.json`.
+
+Eight one-way synonyms in `config/dining-style-synonyms.json` expand phrases such as `relaxed dining`, `smart casual dining`, and `upscale dining` into dataset dining styles. These expand text matching; they do not impose a strict dining-style filter. Restaurant names retain higher searchable-attribute priority. See [search relevance evidence](docs/SEARCH-RELEVANCE.md) for measured outcomes and limitations.
 
 ### Sentence interpretation
 
@@ -118,9 +136,9 @@ Typed cuisine and price intent take priority over corresponding sidebar selectio
 
 ## Location lookup
 
-Visitors may use device location or enter a US city, ZIP, street, or combination. Manual lookup returns candidates for confirmation. Ambiguous or incomplete input may need a state or more detail; a match is not guaranteed.
+Visitors may use device location or enter a US city, ZIP, street, or combination. Manual lookup returns candidates for confirmation. All 50 two-letter USPS state codes and DC select the entire state without geocoding or distance labels; use `NY` for statewide results rather than the ambiguous `New York`. City, ZIP, and street selections use a radius. Finding a location does not guarantee matching restaurants within that radius.
 
-The Python server uses [OpenStreetMap Nominatim](https://nominatim.org/) under its [public usage policy](https://operations.osmfoundation.org/policies/nominatim/):
+The local Python server uses [OpenStreetMap Nominatim](https://nominatim.org/). Its request controls are:
 
 - Lookup occurs only on Find, not autocomplete or background queries.
 - One server process serializes requests with at least 1.1 seconds between starts.
@@ -128,23 +146,32 @@ The Python server uses [OpenStreetMap Nominatim](https://nominatim.org/) under i
 - Requests identify this application and the UI provides OpenStreetMap attribution.
 - The endpoint can be changed with the process environment variable `GEOCODER_URL`.
 
-Use public locations; do not submit personal or confidential information. A production or multi-process deployment needs a suitable provider or shared rate limiting across all instances. This public endpoint is not an unrestricted production dependency.
+Use public locations; do not submit personal or confidential information. On Vercel, Python Functions provide configuration and geocoding. Hosted geocoding uses a shared Redis lock and one-hour cache; it returns an error if the store is unavailable or not configured. Preview and production must share the store to coordinate requests. See [deployment setup](docs/VERCEL.md) for environment variables and checks.
 
 Device location requires browser permission and a working location provider. The user confirmed it worked in Chrome; the in-app browser timed out. Errors provide an address-entry fallback. No device-location request runs automatically on page load.
 
 ## Validation and relevance evidence
 
-| Scenario | Evidence so far |
-| --- | --- |
-| `Chaimmbers Walk Caf` | User confirmed Chambers Walk Cafe & Catering was found; result position was not recorded |
-| Italian with Pizzeria checked | A conflicting-filter failure led to typed-cuisine priority; automated regression covers the request rule. Later reported counts still need a controlled retest |
-| Cheapest American with an expensive dropdown selection | Debugger exposed the conflict; typed-price priority was added and regression-tested; user subsequently accepted the behavior |
-| Pizza / pizzeria / pizzaria / pizzeira | Parser tests confirm the same Pizzeria filter |
-| Price symbols | Renderer derives symbols from price_range to agree with filtering |
-| Device location | User confirmed success in Chrome after in-app browser timeout |
-| ZIP 33101 and Waltham, MA | Successful location lookups were confirmed during development and by the user |
+### Manual smoke checks — September 9, 2026
 
-These are partial relevance findings, not a completed benchmark. Before submission, record controlled exact-name, partial-name, missing-space, typo, broad, empty, and location-sensitive queries, including expected result positions and actual outcomes. Application regression tests do not substitute for evaluating live Algolia relevance.
+The author reported the following outcomes both locally and on the Vercel demo. These checks establish basic functionality; they are not a measured relevance benchmark or an exhaustive mobile/device test.
+
+| Check | Reported outcome |
+| --- | --- |
+| Page load | Styling and restaurant results displayed |
+| `Italian` | Results appeared |
+| `$30 and under`, Visa, and minimum 4 stars | Combined filter check passed |
+| Page 2 | Restaurants changed |
+| Reset | Filters cleared |
+| `Chaimmbers Walk Caf` | Chambers Walk Cafe & Catering was the only result (rank 1), confirmed by the author |
+| Waltham, MA | Location flow passed; zero restaurant results were reported as expected, with no radius recorded |
+| Narrow browser window | Responsive layout remained usable |
+
+[Search relevance evidence](docs/SEARCH-RELEVANCE.md) records earlier direct Algolia tests, Rule corrections, synonyms, and statewide filtering. Exact expected/actual ranking positions and a controlled matrix of filters and radii were not recorded for every query type. A future evaluation could add those measurements and extend coverage of conflicting typed-cuisine/sidebar selections.
+
+### Automated checks
+
+All six commands below passed on September 9, 2026, after the startup and JavaScript compatibility changes.
 
 Run the automated checks from the project root:
 
@@ -170,20 +197,22 @@ The tests cover request construction, stale responses, failures, location state,
 | `debug.js` | Bounded, redacted request log |
 | `scripts/prepare_data.py`, `scripts/index_data.py` | Merge and import restaurant data |
 | `scripts/serve.py`, `scripts/config.py` | Local server and configuration |
-| `scripts/geocode.py` | Nominatim lookup and rate limiting |
+| `scripts/geocode.py` | Local Nominatim lookup and rate limiting |
+| `api/`, `scripts/shared_geocode.py` | Hosted configuration, address lookup, and shared Redis coordination |
+| `vercel.json`, `scripts/build_vercel.py` | Deployment routing and public asset build |
 | `scripts/audit_locations.py` | Coordinate audit |
 | `data/locations.json` | Offline audit output; not the live geocoder |
 | `tests/` | Automated behavior checks |
 
 Comments explain the implementation in the source. Strict JSON files stay valid JSON; `docs/algolia-settings.explained.jsonc` provides an annotated settings reference.
 
-## Remaining submission work
+## Submission checklist
 
-- Complete and consolidate representative relevance tests, including ranking positions and before/after findings.
-- Verify desktop/mobile flows, pagination, and filter interactions end to end.
-- Deploy a public demo. The current server binds to localhost and is a development server, not a production hosting setup.
-- Confirm Algolia Settings → Support Access → Allow Algolia employees to access my account.
-- Add the public demo URL and review this explanation before submission.
+- [x] Complete the eight manual smoke checks locally and on Vercel.
+- [x] Run the six automated test suites successfully.
+- [x] Document relevance findings and evaluation limitations.
+- [x] Enable Algolia employee Support Access (confirmed by the author September 9, 2026).
+- [ ] Submit the live demo link, GitHub repository link, and the short approach explanation below (planned for September 10, 2026).
 
 Historical images and reservation links may no longer be available. Image fallbacks and validated booking links are provided, but current restaurant availability is not verified. Algolia's configured pagination limit can also constrain how many results a broad query exposes.
 
@@ -193,10 +222,6 @@ I kept the original data separate from the generated index records, used Algolia
 
 AI tools assisted implementation and debugging. The code, API debugger, tests, and documented decisions are intended to make the architecture and trade-offs reviewable and explainable.
 
-## Native price Rule: verified configuration
+## Scope of native price Rules
 
-The live `restaurants` index has a verified `affordable` Rule: it removes that word and applies `price_range:"$30 and under"`. Direct API testing returned 585 matches for `affordable Italian`; all 100 inspected records used that band. See [the relevance report](docs/SEARCH-RELEVANCE.md).
-
-`config/price-rules.json` exports the working Rule. Run `python3 scripts/configure_rules.py` to apply it to the index configured in `.env`; this is a write operation and requires Rules permissions. It preserves unrelated Rules and restaurant records.
-
-`config/price-rules-grouped.json` and the root `price-rules-grouped.json` are proposed import files, not the active configuration. The earlier larger migration hit the account Rules quota. The browser still interprets cheap/moderate/expensive; affordable reaches Algolia as text and uses the native Rule. The full native migration is not complete.
+`config/price-rules.json` contains the verified `affordable` Rule. The grouped Rules files are proposals, not evidence that all aliases are active. The broader migration hit the account Rules quota. The browser still interprets cheap/moderate/expensive; affordable reaches Algolia as text and uses the native Rule. This distinction is intentional in the current demo and should be preserved when explaining the implementation.
