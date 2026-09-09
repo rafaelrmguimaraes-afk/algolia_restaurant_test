@@ -33,14 +33,13 @@ function searchParameters(page, includeCuisine = true) {
     if (token.kind === 'price') facetFilters.push(`price_range:${token.value}`);
     if (token.kind === 'payment') facetFilters.push(`payment_options:${token.value}`);
   }
-  return {
+  return Object.assign({
     query: sentenceSearch.parse(searchInput.value.trim()).query, page, hitsPerPage: Number($('#page-size').value) || 20,
     facetFilters, numericFilters: Number(ratingInput.value) ? [`stars_count>=${ratingInput.value}`] : [],
     // Ask for counts by cuisine; highlighting is disabled because cards display plain text.
     facets: ['food_type'], maxValuesPerFacet: 200, attributesToHighlight: [],
     // Both the main and alternate-cuisine queries must use the same search center and radius.
-    ...locationParameters, facetFilters
-  };
+  }, locationParameters, { facetFilters });
 }
 
 // Send one POST to Algolia directly from the browser. The Python server is not a search proxy.
@@ -83,7 +82,7 @@ function reservationUrl(value) {
       || url.username || url.password || url.port) return null;
     url.protocol = 'https:';
     return url.href;
-  } catch { return null; }
+  } catch (error) { return null; }
 }
 
 // Plain text badges are recognizable and do not need a separate logo library.
@@ -140,7 +139,11 @@ function renderCards() {
 function renderCuisines(counts) {
   // Use the original dataset labels without splitting or inferring categories.
   const container = $('#cuisine-filters');
-  const focused = document.activeElement?.closest('#cuisine-filters input')?.value;
+  const activeElement = document.activeElement;
+  const focusedInput = activeElement === null || activeElement === undefined
+    ? undefined : activeElement.closest('#cuisine-filters input');
+  const focused = focusedInput === null || focusedInput === undefined
+    ? undefined : focusedInput.value;
   const scroll = container.scrollTop;
   container.replaceChildren();
   const options = new Set([...Object.keys(counts), ...state.cuisines]);
@@ -168,11 +171,14 @@ async function runSearch(append = false, trigger = 'Search', requestedPage = sta
   renderSentence();
   apiDebug.markGroup(state.request, 'Superseded by a newer search');
   const request = ++state.request;
-  activeRequest?.abort();
+  if (activeRequest !== null && activeRequest !== undefined) activeRequest.abort();
   activeRequest = new AbortController();
   const page = append ? requestedPage : 0;
   more.disabled = true;
-  more.querySelectorAll?.('button').forEach(button => button.disabled = true);
+  const querySelectorAll = more.querySelectorAll;
+  if (querySelectorAll !== null && querySelectorAll !== undefined) {
+    querySelectorAll.call(more, 'button').forEach(button => button.disabled = true);
+  }
   $('.results').setAttribute('aria-busy', 'true');
   $('#search-error').hidden = true;
   count.textContent = 'Searching restaurants…';
@@ -187,10 +193,10 @@ async function runSearch(append = false, trigger = 'Search', requestedPage = sta
       if (sentenceSearch.parse(searchInput.value).tokens.some(t => t.kind === 'cheapest')) {
         const bands = ['$30 and under', '$31 to $50', '$50 and over'];
         const base = searchParameters(0);
-        const probes = await Promise.all(bands.map(band => queryAlgolia({
-          ...base, hitsPerPage:0, facets:[],
+        const probes = await Promise.all(bands.map(band => queryAlgolia(Object.assign({}, base, {
+          hitsPerPage:0, facets:[],
           facetFilters:[...base.facetFilters, `price_range:${band}`]
-        }, activeRequest.signal, request, trigger, 'Find cheapest band: ' + band)));
+        }), activeRequest.signal, request, trigger, 'Find cheapest band: ' + band)));
         if (request !== state.request) return;
         state.cheapestBand = bands.find((band, i) => probes[i].nbHits > 0) || null;
         if (state.cheapestBand) $('#sentence-note').textContent += ' Showing: ' + state.cheapestBand + '.';
@@ -202,7 +208,7 @@ async function runSearch(append = false, trigger = 'Search', requestedPage = sta
     const [result, cuisineResult] = await Promise.all([
       queryAlgolia(searchParameters(page), activeRequest.signal, request, trigger, 'Restaurant results'),
       !append && state.cuisines.size
-        ? queryAlgolia({ ...searchParameters(0, false), hitsPerPage: 0 }, activeRequest.signal, request, trigger, 'Cuisine counts (cuisine filter omitted)')
+        ? queryAlgolia(Object.assign({}, searchParameters(0, false), { hitsPerPage: 0 }), activeRequest.signal, request, trigger, 'Cuisine counts (cuisine filter omitted)')
         : Promise.resolve(null)
     ]);
     // Aborting alone is not enough: a response may already be on its way. Compare request IDs too.
@@ -212,7 +218,10 @@ async function runSearch(append = false, trigger = 'Search', requestedPage = sta
     state.hits = result.hits;
     state.page = result.page; state.pages = result.nbPages;
     renderCards();
-    if (!append) renderCuisines((cuisineResult || result).facets?.food_type || {});
+    if (!append) {
+      const facets = (cuisineResult || result).facets;
+      renderCuisines((facets === null || facets === undefined ? undefined : facets.food_type) || {});
+    }
     count.textContent = `${result.nbHits.toLocaleString()} restaurant${result.nbHits === 1 ? '' : 's'} found`;
     $('#results-note').textContent = `Page ${state.page + 1} of ${Math.max(1, state.pages)} · Search ${result.processingTimeMS} ms`;
     $('#empty-state').hidden = result.nbHits !== 0;
@@ -256,7 +265,7 @@ searchInput.addEventListener('input', () => {
   clearTimeout(debounce);
   // Invalidate immediately, even before the next debounced request starts.
   apiDebug.markGroup(state.request, 'Superseded by typing');
-  ++state.request; activeRequest?.abort();
+  ++state.request; if (activeRequest !== null && activeRequest !== undefined) activeRequest.abort();
   more.hidden = true;
   count.textContent = 'Searching restaurants…';
   $('#results-list').replaceChildren();

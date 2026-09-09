@@ -45,7 +45,7 @@ Start the demo:
 python3 scripts/serve.py
 ```
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Keep the process running; stop it with Ctrl+C. Use this server rather than a generic file server: it supplies search configuration and the location endpoint while restricting access to private files. The retained starter `package.json` is not the current startup workflow.
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Keep the process running; stop it with Ctrl+C. Use this server rather than a generic file server: it supplies search configuration and the location endpoint while restricting access to private files. `npm start` launches this same Python server; no npm installation is required to use the direct Python command above.
 
 ## Data preparation
 

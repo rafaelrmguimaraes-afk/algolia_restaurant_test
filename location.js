@@ -31,7 +31,7 @@ window.restaurantLocation = (() => {
   }
 
   // Cancel the effect of an old device callback after an address is chosen or reset is clicked.
-  function cancelLookup() { ++lookupId; deviceButton.disabled = false; addressRequest?.abort(); document.querySelector('#apply-address').disabled = false; document.querySelector('#address-matches').hidden = true; }
+  function cancelLookup() { ++lookupId; deviceButton.disabled = false; if (addressRequest !== null && addressRequest !== undefined) addressRequest.abort(); document.querySelector('#apply-address').disabled = false; document.querySelector('#address-matches').hidden = true; }
   function clear(notify = true) {
     showAddress(false, false);
     cancelLookup(); selected = null; addressInput.value = ''; radiusInput.value = '40234';
@@ -41,7 +41,7 @@ window.restaurantLocation = (() => {
 
   function applyAddress(match, id) {
     if (id !== lookupId) return;
-    selected = { ...match, source: 'address' };
+    selected = Object.assign({}, match, { source: 'address' });
     document.querySelector('#address-matches').hidden = true;
     addressInput.value = match.label;
     showAddress(false);
@@ -146,12 +146,16 @@ window.restaurantLocation = (() => {
   function debugParameters(parameters) {
     // The teaching panel hides both device and address coordinates; Algolia receives the actual search center.
     return selected && parameters.aroundLatLng
-      ? { ...parameters, aroundLatLng: selected.source === 'device' ? '[device coordinates hidden]' : '[address coordinates hidden]' } : parameters;
+      ? Object.assign({}, parameters, { aroundLatLng: selected.source === 'device' ? '[device coordinates hidden]' : '[address coordinates hidden]' }) : parameters;
   }
 
   function distanceText(restaurant) {
     if (!selected || selected.source === 'state') return '';
-    const meters = restaurant._rankingInfo?.matchedGeoLocation?.distance;
+    const rankingInfo = restaurant._rankingInfo;
+    const matchedGeoLocation = rankingInfo === null || rankingInfo === undefined
+      ? undefined : rankingInfo.matchedGeoLocation;
+    const meters = matchedGeoLocation === null || matchedGeoLocation === undefined
+      ? undefined : matchedGeoLocation.distance;
     if (!Number.isFinite(meters)) return 'Distance unavailable';
     const miles = meters / 1609.344;
     return `≈ ${miles < 0.1 ? '<0.1' : miles.toFixed(1)} mi from ${selected.source === 'device' ? 'your approximate location' : 'selected address'}`;

@@ -13,7 +13,7 @@
     "parcel-bundler": "1.9.7"
   },
   "scripts": {
-    "start": "parcel index.html"
+    "start": "python3 scripts/serve.py"
   },
   "engines": {
     "node": "24.x"
