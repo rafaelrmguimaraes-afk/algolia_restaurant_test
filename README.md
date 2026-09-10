@@ -9,7 +9,7 @@ A restaurant discovery search demo built with Algolia for visitors who are eithe
 
 I created a restaurant discovery search demo for visitors who are looking for places to eat and exploring their options.
 
-The first step was to work with the data provided by Algolia. I joined the two source files — one JSON and one CSV — using `objectID` as the unique identifier, normalized the data, and indexed 5,000 restaurants in Algolia.
+The first step was to work with the data provided by Algolia. I joined the two source files,one JSON and one CSV, using `objectID` as the unique identifier, normalized the data, and indexed 5,000 restaurants in Algolia.
 
 The experience combines text search, cuisine and price filters, ratings, payment options, and location-based discovery. I prioritized restaurant names for known-item searches, added dining-style synonyms and an affordability Rule, and used rating and review count as custom ranking signals. OpenStreetMap's Nominatim service resolves entered locations; Algolia performs the nearby search.
 
